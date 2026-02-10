@@ -2183,14 +2183,12 @@ clearEmployeeSelection: function() {
                                 lastName,
                                 password: password
                             };
-                            this.showToast('Корманд бо пароли нав таҳрир шуд', 'success');
                         } else {
                             employees[index] = { 
                                 ...employees[index], 
                                 firstName, 
                                 lastName
                             };
-                            this.showToast('Корманд бо муваффақият таҳрир шуд', 'success');
                         }
                     }
                 } else {
@@ -2200,12 +2198,21 @@ clearEmployeeSelection: function() {
                         lastName,
                         password: password
                     });
-                    this.showToast('Корманд бо муваффақият илова шуд', 'success');
                 }
                 
-                await this.saveEmployees(employees);
+                const saved = await this.saveEmployees(employees);
+                if (!saved) {
+                    this.showToast('Сабт нашуд. Лутфан хатогии Supabase-ро санҷед.', 'error');
+                    return;
+                }
+
                 this.loadEmployeesForAdmin();
                 this.closeModal();
+                if (isEditMode) {
+                    this.showToast(password.length >= 4 ? 'Корманд бо пароли нав таҳрир шуд' : 'Корманд бо муваффақият таҳрир шуд', 'success');
+                } else {
+                    this.showToast('Корманд бо муваффақият илова шуд', 'success');
+                }
             },
             
             deleteEmployee: function(id) {
@@ -2230,8 +2237,12 @@ clearEmployeeSelection: function() {
                 
                 await this.deleteEmployeeAttendance(id);
                 employees = employees.filter(emp => String(emp.id) !== String(id));
-                await this.saveEmployees(employees);
-                
+                const saved = await this.saveEmployees(employees);
+                if (!saved) {
+                    this.showToast('Ҳазф дар Supabase анҷом нашуд. Хатогиро санҷед.', 'error');
+                    return;
+                }
+
                 this.loadEmployeesForAdmin();
                 this.closeDeleteModal();
                 this.showToast('Корманд бо муваффақият ҳазф шуд', 'success');
@@ -2925,7 +2936,7 @@ saveEmployees: async function(employees) {
     this.persistLocalEmployees();
 
     // Ва ба Supabase ҳам нависем (upsert)
-    if (!this.supabase) return;
+    if (!this.supabase) return true;
 
     try {
         const rows = this.employeesCache.map(e => {
@@ -2955,10 +2966,12 @@ saveEmployees: async function(employees) {
 
         // Пас аз сабт, кэшро аз база аз нав мегирем, то id-ҳои нав дуруст шаванд
         await this.loadData();
+        return true;
     } catch (e) {
         console.error('saveEmployees error', e);
         const errMsg = e && e.message ? ` (${e.message})` : '';
         this.showToast(`Хато: users ба Supabase сабт нашуд${errMsg}`, 'error');
+        return false;
     }
 },
 
@@ -2971,7 +2984,7 @@ saveAttendanceRecords: async function(attendance) {
     this.attendanceCache = Array.isArray(attendance) ? attendance : [];
     this.persistLocalAttendance();
 
-    if (!this.supabase) return;
+    if (!this.supabase) return true;
 
     // Барнома як сабтро баъдтар иваз мекунад (time_out), барои ин UPDATE policy лозим мешавад.
     // Мо кӯшиш мекунем: аввал INSERT, агар бошад — UPDATE мекунем.
@@ -3019,7 +3032,7 @@ deleteEmployeeAttendance: async function(employeeId) {
     this.persistLocalAttendance();
 
     // Аз Supabase: delete policy лозим мешавад. Агар нест — танҳо кэш пок мешавад.
-    if (!this.supabase) return;
+    if (!this.supabase) return true;
 
     try {
         const { error } = await this.supabase
