@@ -1373,7 +1373,14 @@
                     localStorage.setItem('employeePagePassword', 'emp1234');
                 }
 
-                // Агар рӯйхати кормандон холӣ бошад — намуна илова мекунем (барои санҷиш)
+                // Муҳим: агар Supabase фаъол бошад, маълумотро танҳо аз база мегирем.
+                // Иловаи "намунавӣ" бо id-ҳои локалӣ (1,2,3) метавонад insert/upsert-ро вайрон кунад
+                // (масалан, агар users.id дар Supabase навъи uuid бошад).
+                if (this.supabase) {
+                    return;
+                }
+
+                // Фақат дар офлайн-режим (бе Supabase) намуна мегузорем
                 const employees = this.getEmployees();
                 if (!employees || employees.length === 0) {
                     this.saveEmployees([
@@ -2944,7 +2951,8 @@ saveEmployees: async function(employees) {
         await this.loadData();
     } catch (e) {
         console.error('saveEmployees error', e);
-        this.showToast('Хато: users ба Supabase сабт нашуд (Policies UPDATE/INSERT-ро санҷед).', 'error');
+        const errMsg = e && e.message ? ` (${e.message})` : '';
+        this.showToast(`Хато: users ба Supabase сабт нашуд${errMsg}`, 'error');
     }
 },
 
