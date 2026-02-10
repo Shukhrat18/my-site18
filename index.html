@@ -1,0 +1,3106 @@
+<!DOCTYPE html>
+<html lang="tg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Системаи Қайдҳозирбуд</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background-color: #f5f7fa; color: #333; line-height: 1.6; }
+        #app { min-height: 100vh; display: flex; flex-direction: column; }
+        
+        .page { display: none; flex: 1; flex-direction: column; }
+        .page.active { display: flex; }
+        
+        /* Саҳифаи аввал */
+        .start-container { max-width: 500px; margin: 50px auto; padding: 30px; background-color: white; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.08); }
+        .start-logo { text-align: center; margin-bottom: 30px; }
+        .start-logo i { font-size: 64px; color: #4a6cf7; margin-bottom: 20px; }
+        .start-logo h1 { font-size: 28px; font-weight: 700; color: #333; margin-bottom: 10px; }
+        .start-logo p { color: #666; font-size: 16px; }
+        
+        .start-buttons { display: flex; flex-direction: column; gap: 20px; margin-top: 30px; }
+        
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 500; color: #555; }
+        .form-group input { width: 100%; padding: 12px 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; transition: border-color 0.3s; }
+        .form-group input:focus { border-color: #4a6cf7; outline: none; }
+        
+        .btn { padding: 12px 24px; border: none; border-radius: 8px; font-size: 16px; font-weight: 500; cursor: pointer; transition: all 0.3s; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn i { font-size: 18px; }
+        .primary-btn { background-color: #4a6cf7; color: white; }
+        .primary-btn:hover { background-color: #3a5ce5; }
+        .secondary-btn { background-color: #f1f3f9; color: #555; }
+        .secondary-btn:hover { background-color: #e4e7f2; }
+        .danger-btn { background-color: #f74a4a; color: white; }
+        .danger-btn:hover { background-color: #e53a3a; }
+        .biometric-btn { background-color: #6c5ce7; color: white; width: 100%; }
+        .biometric-btn:hover { background-color: #5a4bd4; }
+        .small-btn { padding: 8px 16px; font-size: 14px; }
+        .large-btn { padding: 15px 30px; font-size: 18px; }
+        .icon-btn { background: none; border: none; font-size: 20px; color: #555; cursor: pointer; padding: 8px; border-radius: 50%; transition: background-color 0.3s; }
+        .icon-btn:hover { background-color: #f1f3f9; }
+        
+        .separator { display: flex; align-items: center; text-align: center; margin: 20px 0; }
+        .separator::before, .separator::after { content: ''; flex: 1; border-bottom: 1px solid #ddd; }
+        .separator span { padding: 0 15px; color: #777; font-size: 14px; }
+        .demo-info { margin-top: 25px; padding: 15px; background-color: #f9f9ff; border-radius: 8px; text-align: center; font-size: 14px; color: #666; }
+        
+        /* Саҳифаҳои гуногун */
+        header { display: flex; justify-content: space-between; align-items: center; padding: 20px 30px; background-color: white; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .header-left, .header-right { display: flex; align-items: center; gap: 15px; }
+        .header-left h1 { font-size: 22px; font-weight: 600; color: #333; }
+        .content { flex: 1; padding: 30px; max-width: 1200px; margin: 0 auto; width: 100%; }
+        
+        .search-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 15px; }
+        .search-box { display: flex; align-items: center; background-color: white; border: 1px solid #ddd; border-radius: 8px; padding: 12px 15px; flex: 1; min-width: 250px; }
+        .search-box i { color: #888; margin-right: 10px; }
+        .search-box input { border: none; outline: none; width: 100%; font-size: 16px; }
+        .export-import { display: flex; gap: 10px; flex-wrap: wrap; }
+        
+        /* Рӯйхати кормандон (барои админ) */
+        .employee-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+        .employee-card { background-color: white; border-radius: 10px; padding: 20px; box-shadow: 0 3px 10px rgba(0,0,0,0.05); transition: transform 0.3s, box-shadow 0.3s; display: flex; justify-content: space-between; align-items: center; }
+        .employee-card:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.08); }
+        .employee-info h3 { font-size: 18px; font-weight: 600; color: #333; margin-bottom: 5px; }
+        .employee-info p { color: #666; font-size: 14px; }
+        .employee-actions { display: flex; gap: 10px; }
+        .employee-actions button { background: none; border: none; font-size: 18px; cursor: pointer; padding: 5px; border-radius: 5px; transition: background-color 0.3s; }
+        .edit-btn { color: #4a6cf7; }
+        .edit-btn:hover { background-color: rgba(74,108,247,0.1); }
+        .delete-btn { color: #f74a4a; }
+        .delete-btn:hover { background-color: rgba(247,74,74,0.1); }
+        
+        /* Рӯйхати кормандон (барои кормандон) */
+        .employee-list-simple { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px; }
+        .employee-card-simple { 
+            background-color: white; 
+            border-radius: 10px; 
+            padding: 20px; 
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05); 
+            transition: transform 0.3s, box-shadow 0.3s; 
+            cursor: pointer; 
+            text-align: center;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+        .employee-card-simple.selected {
+            background-color: #f0f7ff;
+            border: 2px solid #4a6cf7;
+        }
+        .employee-card-simple h3 { font-size: 18px; font-weight: 600; color: #333; margin-bottom: 5px; }
+        .employee-card-simple p { color: #666; font-size: 14px; }
+        
+        /* Модалӣ */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
+        .modal.active { display: flex; }
+        .modal-content { background-color: white; border-radius: 12px; width: 90%; max-width: 500px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .small-modal { max-width: 400px; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 20px 25px; border-bottom: 1px solid #eee; }
+        .modal-header h2 { font-size: 20px; font-weight: 600; color: #333; }
+        .close-btn { background: none; border: none; font-size: 28px; color: #888; cursor: pointer; line-height: 1; }
+        .close-btn:hover { color: #333; }
+        .modal-body { padding: 25px; }
+        .modal-footer { padding: 20px 25px; border-top: 1px solid #eee; display: flex; justify-content: flex-end; gap: 15px; }
+        
+        /* Саҳифаи ҳозирбуд */
+        .attendance-container { display: flex; flex-direction: column; gap: 30px; }
+        .attendance-card { background-color: white; border-radius: 12px; padding: 25px; box-shadow: 0 3px 10px rgba(0,0,0,0.05); }
+        .date-selector { display: flex; align-items: center; gap: 15px; margin-bottom: 25px; flex-wrap: wrap; }
+        .date-selector label { font-weight: 500; color: #555; }
+        .date-selector input[type="date"] { padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; }
+        
+        .status-selector { margin-bottom: 25px; }
+        .status-selector h3 { margin-bottom: 15px; font-weight: 600; color: #333; }
+        .status-options { display: flex; gap: 20px; }
+        .status-option { 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            cursor: pointer; 
+            transition: transform 0.3s;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+        .status-option:hover { transform: scale(1.05); }
+        .status-option.selected .status-icon { transform: scale(1.1); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .status-icon { width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; margin-bottom: 10px; transition: all 0.3s; }
+        .status-icon.present { background-color: #e7f7ef; color: #2ecc71; }
+        .status-icon.absent { background-color: #fdeaea; color: #e74c3c; }
+        .status-option span { font-weight: 500; color: #555; }
+        
+        .current-status { margin-bottom: 25px; }
+        .current-status h3 { margin-bottom: 10px; font-weight: 600; color: #333; }
+        .status-badge { display: inline-block; padding: 8px 16px; border-radius: 20px; font-weight: 500; }
+        .status-badge.default { background-color: #f1f3f9; color: #555; }
+        .status-badge.present { background-color: #e7f7ef; color: #2ecc71; }
+        .status-badge.absent { background-color: #fdeaea; color: #e74c3c; }
+        
+        .history-container { background-color: white; border-radius: 12px; padding: 25px; box-shadow: 0 3px 10px rgba(0,0,0,0.05); }
+        .history-list { max-height: 400px; overflow-y: auto; }
+        .history-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid #f1f1f1; }
+        .history-item:last-child { border-bottom: none; }
+        .history-date { font-weight: 500; color: #333; }
+        .history-status { padding: 5px 12px; border-radius: 20px; font-size: 14px; font-weight: 500; }
+        .history-status.present { background-color: #e7f7ef; color: #2ecc71; }
+        .history-status.absent { background-color: #fdeaea; color: #e74c3c; }
+        
+        /* Саҳифаи ҳисобот */
+        .reports-container { background-color: white; border-radius: 12px; padding: 25px; box-shadow: 0 3px 10px rgba(0,0,0,0.05); }
+        .report-filters { display: flex; gap: 20px; margin-bottom: 30px; flex-wrap: wrap; align-items: flex-end; }
+        .filter-group { display: flex; flex-direction: column; gap: 8px; }
+        .filter-group label { font-weight: 500; color: #555; }
+        .filter-group select, .filter-group input { padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; min-width: 150px; }
+        
+        .report-table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 14px; }
+        .report-table th, .report-table td { padding: 10px 8px; text-align: center; border: 1px solid #eee; }
+        .report-table th { background-color: #f9f9ff; font-weight: 600; color: #333; }
+        .report-table td { color: #555; }
+        .report-table .present-cell { background-color: #e7f7ef; color: #2ecc71; font-weight: bold; }
+        .report-table .absent-cell { background-color: #fdeaea; color: #e74c3c; font-weight: bold; }
+        .report-table .no-data { background-color: #f9f9f9; color: #999; }
+        
+        .toast { position: fixed; bottom: 30px; right: 30px; background-color: #333; color: white; padding: 15px 25px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); display: none; z-index: 1001; max-width: 400px; }
+        .toast.active { display: flex; animation: fadeInUp 0.3s, fadeOutDown 0.3s 2.7s; }
+        .toast-content { display: flex; align-items: center; gap: 10px; }
+        .toast.success { background-color: #2ecc71; }
+        .toast.error { background-color: #e74c3c; }
+        .toast.warning { background-color: #f39c12; }
+        
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeOutDown {
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(20px); }
+        }
+        
+        /* Нав: Стили барои адаптатсия */
+        .mobile-only { display: none; }
+        .desktop-only { display: flex; }
+        
+        /* Нав: Стили барои телефонҳо (экранҳои хурдтар аз 768px) */
+        @media (max-width: 768px) {
+            .mobile-only { display: flex; }
+            .desktop-only { display: none; }
+            
+            .start-container, .login-container { 
+                margin: 20px; 
+                padding: 20px; 
+                max-width: 100%; 
+            }
+            
+            header { 
+                flex-direction: column; 
+                align-items: flex-start; 
+                gap: 15px; 
+                padding: 15px 20px;
+            }
+            
+            .header-left h1 {
+                font-size: 20px;
+            }
+            
+            .header-right { 
+                width: 100%; 
+                justify-content: space-between;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+            
+            .header-right .btn {
+                font-size: 14px;
+                padding: 10px 15px;
+            }
+            
+            .content { 
+                padding: 20px 15px; 
+            }
+            
+            .search-container { 
+                flex-direction: column; 
+                align-items: stretch; 
+            }
+            
+            .search-box {
+                min-width: 100%;
+            }
+            
+            .export-import { 
+                justify-content: center; 
+                width: 100%;
+            }
+            
+            .employee-list, .employee-list-simple { 
+                grid-template-columns: 1fr; 
+            }
+            
+            .employee-card {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .employee-actions {
+                align-self: flex-end;
+            }
+            
+            .status-options { 
+                flex-direction: column; 
+                align-items: center;
+                gap: 15px;
+            }
+            
+            .status-icon {
+                width: 70px;
+                height: 70px;
+                font-size: 28px;
+            }
+            
+            .report-filters { 
+                flex-direction: column; 
+                align-items: stretch; 
+            }
+            
+            .filter-group select, .filter-group input { 
+                width: 100%; 
+                min-width: auto;
+            }
+            
+            .modal-content { 
+                width: 95%; 
+                margin: 10px; 
+            }
+            
+            .modal-body {
+                padding: 20px 15px;
+            }
+            
+            .modal-footer {
+                padding: 15px 20px;
+            }
+            
+            .toast { 
+                left: 20px; 
+                right: 20px; 
+                max-width: none; 
+                bottom: 20px;
+                padding: 12px 20px;
+            }
+            
+            /* Нав: Барои телефонҳои хурд */
+            .fixed-date-display {
+                padding: 12px;
+            }
+            
+            .fixed-date-display .date-value {
+                font-size: 20px;
+            }
+            
+            .btn.large-btn {
+                padding: 12px 24px;
+                font-size: 16px;
+            }
+            
+            /* Нав: Барои кнопкаҳои хурд дар мобайл */
+            .header-right .btn {
+                flex: 1;
+                min-width: 120px;
+                justify-content: center;
+            }
+            
+            /* Нав: Барои ҷадвали ҳисоботҳо дар мобайл */
+            .report-table-container {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            .report-table {
+                min-width: 800px;
+            }
+            
+            /* Нав: Барои таърихча дар мобайл */
+            .history-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .history-date, .history-status {
+                width: 100%;
+                text-align: left;
+            }
+            
+            .history-status {
+                display: inline-block;
+                width: fit-content;
+            }
+            
+            /* Нав: Барои модалии танзимотҳо дар мобайл */
+            .settings-dropdown-content {
+                position: fixed;
+                top: auto;
+                right: 20px;
+                left: 20px;
+                bottom: 20px;
+                min-width: auto;
+                max-height: 300px;
+                overflow-y: auto;
+            }
+            
+            /* Нав: Барои табҳо дар модалии танзимотҳо */
+            .tab-buttons {
+                flex-direction: column;
+            }
+            
+            .tab-button {
+                width: 100%;
+                text-align: center;
+            }
+            
+            /* Нав: Барои тугмаҳо дар мобайл */
+            .btn, .icon-btn, .employee-actions button, .password-toggle, .close-btn {
+                min-height: 44px; /* Барои тап кардан осонтар */
+                min-width: 44px;
+            }
+            
+            /* Нав: Барои карточкаҳои кормандон дар мобайл */
+            .employee-card-simple {
+                min-height: 100px;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+            }
+            
+            /* Нав: Барои пешгирии тапҳои ногаҳонӣ */
+            .employee-card-simple {
+                touch-action: manipulation;
+            }
+            
+            .employee-card-simple h3 {
+                font-size: 16px;
+                margin-bottom: 8px;
+            }
+            
+            .employee-card-simple p {
+                font-size: 12px;
+                color: #888;
+            }
+            
+            /* Нав: Барои инфо-бокс дар мобайл */
+            .info-box {
+                padding: 12px;
+                font-size: 14px;
+            }
+            
+            /* Нав: Барои барқароркунии систими ҷустуҷӯ дар мобайл */
+            .employee-search-box {
+                margin-bottom: 20px;
+                width: 100%;
+            }
+        }
+        
+        /* Нав: Барои телефонҳои хеле хурд (экранҳои камтар аз 480px) */
+        @media (max-width: 480px) {
+            .start-container, .login-container { 
+                margin: 10px; 
+                padding: 15px; 
+            }
+            
+            .start-logo i {
+                font-size: 48px;
+            }
+            
+            .start-logo h1 {
+                font-size: 24px;
+            }
+            
+            header { 
+                padding: 12px 15px;
+            }
+            
+            .header-left h1 {
+                font-size: 18px;
+            }
+            
+            .header-right .btn {
+                font-size: 12px;
+                padding: 8px 12px;
+                min-width: 100px;
+            }
+            
+            .content { 
+                padding: 15px 10px; 
+            }
+            
+            .btn {
+                padding: 10px 16px;
+                font-size: 15px;
+            }
+            
+            .btn.large-btn {
+                padding: 12px 20px;
+            }
+            
+            .form-group input {
+                padding: 10px 12px;
+                font-size: 16px; /* Барои пешгирии зуми автоматӣ дар iOS */
+            }
+            
+            /* Нав: Барои тугмаҳо дар саҳифаи ҳозирбуд */
+            .status-option span {
+                font-size: 14px;
+            }
+            
+            .status-icon {
+                width: 60px;
+                height: 60px;
+                font-size: 24px;
+            }
+            
+            /* Нав: Барои навиштан дар саҳифаи аввал */
+            .demo-info {
+                padding: 12px;
+                font-size: 13px;
+            }
+            
+            /* Нав: Барои хомӯш кардани баъзе элементҳо дар мобайл */
+            .header-right .btn .btn-text {
+                display: none;
+            }
+            
+            .header-right .btn i {
+                margin-right: 0;
+            }
+            
+            .header-right .btn {
+                width: 44px;
+                height: 44px;
+                padding: 0;
+                border-radius: 50%;
+                justify-content: center;
+                min-width: auto;
+            }
+            
+            /* Нав: Барои кнопкаҳои иловагӣ дар ҳама ҷо */
+            .mobile-btn-text {
+                display: none;
+            }
+            
+            /* Нав: Барои ҷустуҷӯ дар мобайл */
+            .employee-search-box {
+                margin-top: 10px;
+            }
+            
+            .employee-search-box input {
+                font-size: 14px;
+            }
+        }
+        
+        /* Нав: Барои планшетҳо (768px то 1024px) */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .content {
+                padding: 25px 20px;
+            }
+            
+            .employee-list {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+            
+            .employee-card {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .employee-actions {
+                align-self: flex-end;
+            }
+            
+            .header-right {
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+            
+            .header-right .btn {
+                font-size: 14px;
+                padding: 10px 15px;
+            }
+            
+            /* Нав: Барои ҷустуҷӯ дар планшет */
+            .employee-search-box {
+                width: 100%;
+                margin-bottom: 20px;
+            }
+        }
+        
+        .empty-state { text-align: center; padding: 40px 20px; color: #666; }
+        .empty-state i { font-size: 48px; margin-bottom: 15px; color: #ccc; }
+        
+        .date-range-selector { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        .date-range-selector input[type="date"] { padding: 8px; border: 1px solid #ddd; border-radius: 6px; }
+        
+        .password-input-container { position: relative; }
+        .password-toggle { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #666; cursor: pointer; }
+        
+        .info-box { background-color: #f0f7ff; border-left: 4px solid #4a6cf7; padding: 15px; margin-bottom: 20px; border-radius: 0 8px 8px 0; }
+        .info-box p { margin: 0; color: #555; }
+        
+        /* Стили дополнителные для login-container */
+        .login-container { max-width: 500px; margin: 50px auto; padding: 30px; background-color: white; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.08); }
+        .login-container .logo { text-align: center; margin-bottom: 30px; }
+        .login-container .logo i { font-size: 64px; color: #4a6cf7; margin-bottom: 20px; }
+        .login-container .logo h1 { font-size: 28px; font-weight: 700; color: #333; margin-bottom: 10px; }
+        .login-container .login-form h2 { margin-bottom: 20px; font-weight: 600; color: #333; }
+        
+        /* Нав: Санаи фиксированӣ */
+        .fixed-date-display {
+            background-color: #f0f7ff;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 25px;
+            border: 2px solid #4a6cf7;
+        }
+        
+        .fixed-date-display h3 {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        
+        .fixed-date-display .date-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4a6cf7;
+        }
+        
+        /* Нав: Стилҳои тугмаҳои танзимот */
+        .settings-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .settings-dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: white;
+            min-width: 220px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            z-index: 100;
+            overflow: hidden;
+        }
+        
+        .settings-dropdown-content a {
+            color: #333;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            text-align: left;
+            border-bottom: 1px solid #f1f1f1;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .settings-dropdown-content a:hover {
+            background-color: #f1f3f9;
+        }
+        
+        .settings-dropdown-content a:last-child {
+            border-bottom: none;
+        }
+        
+        .settings-dropdown.active .settings-dropdown-content {
+            display: block;
+        }
+        
+        .tab-buttons {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 20px;
+        }
+        
+        .tab-button {
+            flex: 1;
+            padding: 12px;
+            background: none;
+            border: none;
+            font-size: 16px;
+            font-weight: 500;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .tab-button.active {
+            color: #4a6cf7;
+            border-bottom: 3px solid #4a6cf7;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .password-info {
+            background-color: #f9f9ff;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        /* Нав: Стилҳои систими ҷустуҷӯ барои кормандон */
+        .employee-search-box {
+            display: flex;
+            align-items: center;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 12px 15px;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+        
+        .employee-search-box i {
+            color: #888;
+            margin-right: 10px;
+        }
+        
+        .employee-search-box input {
+            border: none;
+            outline: none;
+            width: 100%;
+            font-size: 16px;
+        }
+        
+        /* Нав: Барои такмили адаптатсия дар компютерҳо */
+        @media (min-width: 1200px) {
+            .content {
+                max-width: 1400px;
+            }
+            
+            .employee-list {
+                grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            }
+        }
+        
+        /* Нав: Барои таъмини андозаи минималии тугмаҳо барои тап кардан */
+        @media (hover: none) and (pointer: coarse) {
+            .btn, .icon-btn, .employee-actions button, .password-toggle, .close-btn {
+                min-height: 44px;
+                min-width: 44px;
+            }
+            
+            .form-group input, .form-group select {
+                font-size: 16px; /* Пешгирии зуми автоматӣ дар iOS */
+            }
+            
+            .status-option {
+                min-height: 44px;
+                min-width: 44px;
+            }
+            
+            /* Нав: Барои пешгирии тапҳои ногаҳонӣ дар кормандон */
+            .employee-card-simple {
+                -webkit-tap-highlight-color: transparent;
+                touch-action: manipulation;
+                user-select: none;
+            }
+        }
+        
+        /* Нав: Барои режими landscape дар мобайл */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .start-container, .login-container {
+                margin: 10px auto;
+                padding: 15px;
+                max-height: 90vh;
+                overflow-y: auto;
+            }
+            
+            .modal-content {
+                max-height: 90vh;
+                overflow-y: auto;
+            }
+            
+            .history-list {
+                max-height: 200px;
+            }
+            
+            /* Нав: Барои саҳифаи кормандон дар landscape */
+            .employee-list-simple {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                max-height: 70vh;
+                overflow-y: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- Саҳифаи аввал (интихоби намуд) -->
+        <div id="start-page" class="page active">
+            <div class="start-container">
+                <div class="start-logo">
+                    <i class="fas fa-clipboard-check"></i>
+                    <h3 style="color: red;">КОЛЛЕҶИ МАХСУСГАРДОНИДАШУДАИ Ш.БОХТАР</h3>
+                    <h1>Системаи Қайдҳозирбудан</h1>
+                    <p>Система барои идоракунии ҳозирбуди кормандон</p>
+                </div>
+                
+                <div class="start-buttons">
+                    <button id="admin-login-btn" class="btn primary-btn large-btn" onclick="App.showPage('admin-login')">
+                        <i class="fas fa-user-shield"></i> 
+                        <span class="desktop-only">Воридшавӣ барои Администратор</span>
+                        <span class="mobile-only">Администратор</span>
+                    </button>
+                    
+                    <button id="employee-access-btn" class="btn secondary-btn large-btn" onclick="App.showPage('open-employee-page-login')">
+                        <i class="fas fa-users"></i> 
+                        <span class="desktop-only">Саҳифаи Кормандон</span>
+                        <span class="mobile-only">Кормандон</span>
+                    </button>
+                </div>
+                
+                <div class="demo-info">
+                    <p><strong>Барномаро сохтааст:</strong> Шухрат Зайнуллоев</p>
+                    <a href="https://wa.me/qr/ALXKVQFABW6WO1" class="custom-link" target="_blank">WhatsApp: Shuhrat</a>
+                    <p style="margin-top: 10px; font-size: 13px;">Администратор метавонад тамоми кормандонро идора кунад. Кормандон танҳо метавонанд ҳозирбудани худро сабт кунанд.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Саҳифаи воридшавии администратор -->
+        <div id="admin-login-page" class="page">
+            <div class="login-container">
+                <div class="logo">
+                    <i class="fas fa-user-shield"></i>
+                    <h1>Воридшавӣ барои Администратор</h1>
+                </div>
+                
+                <div class="login-form">
+                    <h2>Лутфан худро тасдиқ кунед</h2>
+                    
+                    <div id="password-form">
+                        <div class="form-group">
+                            <label for="admin-login">Логин</label>
+                            <input type="text" id="admin-login" placeholder="admin" value="admin">
+                        </div>
+                        <div class="form-group">
+                            <label for="admin-password">Парол</label>
+                            <input type="password" id="admin-password" placeholder="1234">
+                        </div>
+                        <button id="admin-login-submit-btn" class="btn primary-btn">
+                            <i class="fas fa-sign-in-alt"></i> Воридшавӣ
+                        </button>
+                    </div>
+                    
+                    <div style="margin-top: 20px;">
+                        <button id="back-to-start-from-admin" class="btn secondary-btn">
+                            <i class="fas fa-arrow-left"></i> Бозгашт
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Саҳифаи администратор -->
+        <div id="admin-page" class="page">
+            <header>
+                <div class="header-left">
+                    <button id="admin-back-to-start" class="icon-btn" title="Ба саҳифаи асосӣ">
+                        <i class="fas fa-home"></i>
+                    </button>
+                    <h1>Панели Администратор</h1>
+                </div>
+                <div class="header-right">
+                    <div class="settings-dropdown" id="settings-dropdown">
+                        <button id="settings-btn" class="btn secondary-btn">
+                            <i class="fas fa-cog"></i> 
+                            <span class="desktop-only">Танзимотҳо</span>
+                        </button>
+                        <div class="settings-dropdown-content">
+                            <a id="change-admin-password-btn"><i class="fas fa-user-shield"></i> Ивази пароли администратор</a>
+                            <a id="change-employee-page-password-btn"><i class="fas fa-users"></i> Ивази пароли саҳифаи кормандон</a>
+                        </div>
+                    </div>
+                    <button id="open-employee-page-btn" class="btn secondary-btn">
+                        <i class="fas fa-external-link-alt"></i> 
+                        <span class="desktop-only">Кушодани Саҳифаи Кормандон</span>
+                        <span class="mobile-only">Кормандон</span>
+                    </button>
+                    <button id="reports-btn" class="btn secondary-btn">
+                        <i class="fas fa-chart-bar"></i> 
+                        <span class="desktop-only">Ҳисобот</span>
+                    </button>
+                    <button id="add-employee-btn" class="btn primary-btn">
+                        <i class="fas fa-user-plus"></i> 
+                        <span class="desktop-only">Иловаи корманд</span>
+                        <span class="mobile-only">Илова</span>
+                    </button>
+                </div>
+            </header>
+            
+            <div class="content">
+                <div class="info-box">
+                    <p><i class="fas fa-info-circle"></i> Шумо дар панели администратор ҳастед. Дар ин ҷо шумо метавонед кормандонро идора кунед, ҳисоботҳоро бинед ва саҳифаи махсуси кормандонро кушоед.</p>
+                </div>
+                
+                <div class="search-container">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="search-employee" placeholder="Ҷустуҷӯи корманд...">
+                    </div>
+                    <div class="export-import">
+                        <button id="export-json-btn" class="btn secondary-btn small-btn">
+                            <i class="fas fa-file-export"></i> 
+                            <span class="desktop-only">Export JSON</span>
+                            <span class="mobile-only">JSON</span>
+                        </button>
+                        <button id="import-json-btn" class="btn secondary-btn small-btn">
+                            <i class="fas fa-file-import"></i> 
+                            <span class="desktop-only">Import JSON</span>
+                            <span class="mobile-only">JSON</span>
+                        </button>
+                        <input type="file" id="json-file-input" accept=".json" style="display: none;">
+                        <button id="export-excel-btn" class="btn secondary-btn small-btn">
+                            <i class="fas fa-file-excel"></i> 
+                            <span class="desktop-only">Export Excel</span>
+                            <span class="mobile-only">Excel</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="employee-list" id="admin-employee-list">
+                    <!-- Кормандон дар ин ҷо бо JavaScript пур карда мешаванд -->
+                </div>
+            </div>
+            
+            <!-- Модалии илова/таҳрири корманд -->
+            <div id="add-edit-modal" class="modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 id="modal-title">Иловаи корманд</h2>
+                        <button id="close-modal-btn" class="close-btn">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="employee-firstname">Ном</label>
+                            <input type="text" id="employee-firstname" placeholder="Ном">
+                        </div>
+                        <div class="form-group">
+                            <label for="employee-lastname">Насаб</label>
+                            <input type="text" id="employee-lastname" placeholder="Насаб">
+                        </div>
+                        <div class="form-group password-input-container">
+                            <label for="employee-password">Пароли корманд (ҳадди ақал 4 рамз)</label>
+                            <input type="password" id="employee-password" placeholder="Парол">
+                            <button type="button" class="password-toggle" id="toggle-password">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <div class="form-group" id="confirm-password-group" style="display: none;">
+                            <label for="confirm-employee-password">Такрори парол</label>
+                            <input type="password" id="confirm-employee-password" placeholder="Такрори парол">
+                        </div>
+                        <div id="edit-employee-id" style="display: none;"></div>
+                        <div id="employee-edit-note" style="display: none; color: #666; font-size: 14px; margin-top: 10px;">
+                            <i class="fas fa-info-circle"></i> Агар паролро тағир надиҳед, пароли қадим боқӣ мемонад.
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button id="cancel-modal-btn" class="btn secondary-btn">Бекор кардан</button>
+                        <button id="save-employee-btn" class="btn primary-btn">Сабт кардан</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Модалии ҳазфи корманд -->
+            <div id="delete-confirm-modal" class="modal">
+                <div class="modal-content small-modal">
+                    <div class="modal-header">
+                        <h2>Тасдиқи ҳазф</h2>
+                        <button id="close-delete-modal-btn" class="close-btn">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Оё шумо мутмаин ҳастед, ки ин кормандро ҳазф кардан мехоҳед?</p>
+                        <p id="employee-to-delete-name" style="font-weight: bold; margin: 10px 0;"></p>
+                        <p style="color: #e74c3c; font-size: 14px;">
+                            <i class="fas fa-exclamation-triangle"></i> Ҳамаи маълумоти ҳозирбуди ин корманд низ ҳазф карда мешаванд!
+                        </p>
+                    </div>
+                    <div class="modal-footer">
+                        <button id="cancel-delete-btn" class="btn secondary-btn">Не</button>
+                        <button id="confirm-delete-btn" class="btn danger-btn">Ҳа, ҳазф кардан</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Модалии танзими паролҳо -->
+            <div id="password-settings-modal" class="modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>Танзими паролҳо</h2>
+                        <button id="close-password-settings-modal-btn" class="close-btn">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="tab-buttons">
+                            <button class="tab-button active" data-tab="admin-password-tab">Пароли администратор</button>
+                            <button class="tab-button" data-tab="employee-page-password-tab">Пароли саҳифаи кормандон</button>
+                        </div>
+                        
+                        <div class="password-info">
+                            <i class="fas fa-info-circle"></i> Лутфан пароли куҳна ва навро барои тағирот ворид кунед.
+                        </div>
+                        
+                        <!-- Танзими пароли администратор -->
+                        <div id="admin-password-tab" class="tab-content active">
+                            <div class="form-group">
+                                <label for="current-admin-password">Пароли куҳнаи администратор</label>
+                                <input type="password" id="current-admin-password" placeholder="Пароли куҳна">
+                            </div>
+                            <div class="form-group">
+                                <label for="new-admin-password">Пароли нави администратор (ҳадди ақал 4 рамз)</label>
+                                <input type="password" id="new-admin-password" placeholder="Пароли нав">
+                            </div>
+                            <div class="form-group">
+                                <label for="confirm-new-admin-password">Такрори пароли нав</label>
+                                <input type="password" id="confirm-new-admin-password" placeholder="Такрори пароли нав">
+                            </div>
+                            <div class="form-group">
+                                <button id="change-admin-password-submit" class="btn primary-btn">
+                                    <i class="fas fa-save"></i> Ивази пароли администратор
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Танзими пароли саҳифаи кормандон -->
+                        <div id="employee-page-password-tab" class="tab-content">
+                            <div class="form-group">
+                                <label for="current-employee-page-password">Пароли куҳнаи саҳифаи кормандон</label>
+                                <input type="password" id="current-employee-page-password" placeholder="Пароли куҳна">
+                            </div>
+                            <div class="form-group">
+                                <label for="new-employee-page-password">Пароли нави саҳифаи кормандон (ҳадди ақал 4 рамз)</label>
+                                <input type="password" id="new-employee-page-password" placeholder="Пароли нав">
+                            </div>
+                            <div class="form-group">
+                                <label for="confirm-new-employee-page-password">Такрори пароли нав</label>
+                                <input type="password" id="confirm-new-employee-page-password" placeholder="Такрори пароли нав">
+                            </div>
+                            <div class="form-group">
+                                <button id="change-employee-page-password-submit" class="btn primary-btn">
+                                    <i class="fas fa-save"></i> Ивази пароли саҳифаи кормандон
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button id="cancel-password-settings-btn" class="btn secondary-btn">Пӯшидан</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Саҳифаи кормандон (барои кормандон) -->
+        <div id="employee-page" class="page">
+            <header>
+                <div class="header-left">
+                    <h1>Саҳифаи Ҳозирбуди Кормандон</h1>
+                </div>
+                <div class="header-right">
+                    <button id="close-employee-page-btn" class="btn secondary-btn">
+                        <i class="fas fa-times"></i> 
+                        <span class="desktop-only">Пӯшидани саҳифа</span>
+                        <span class="mobile-only">Пӯшидан</span>
+                    </button>
+                </div>
+            </header>
+            
+            <div class="content">
+                <div class="info-box">
+                    <p><i class="fas fa-info-circle"></i> Ин саҳифа барои кормандон аст. Лутфан номи худро интихоб кунед, то ҳозирбуди худро сабт кунед.</p>
+                </div>
+                
+                <!-- Нав: Ҷустуҷӯ барои кормандон -->
+                <div class="employee-search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="employee-search-input" placeholder="Ҷустуҷӯи корманд...">
+                </div>
+                
+                <div class="employee-list-simple" id="employee-list-simple">
+                    <!-- Кормандон дар ин ҷо бо JavaScript пур карда мешаванд -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- Саҳифаи кушодани саҳифаи кормандон (пароли администратор) -->
+        <div id="open-employee-page-login-page" class="page">
+            <div class="login-container">
+                <div class="logo">
+                    <i class="fas fa-users"></i>
+                    <h1>Кушодани Саҳифаи Кормандон</h1>
+                </div>
+                
+                <div class="login-form">
+                    <h2>Барои кушодани саҳифаи кормандон, лутфан пароли саҳифаи кормандонро ворид кунед:</h2>
+                    
+                    <div class="form-group">
+                        <label for="open-employee-password">Пароли саҳифаи кормандон</label>
+                        <input type="password" id="open-employee-password" placeholder="Пароли саҳифаи кормандон">
+                    </div>
+                    
+                    <div style="display: flex; gap: 15px; margin-top: 25px;">
+                        <button id="back-to-start-from-employee-login" class="btn secondary-btn">
+                            <i class="fas fa-arrow-left"></i> Бозгашт
+                        </button>
+                        <button id="confirm-open-employee-page" class="btn primary-btn">
+                            <i class="fas fa-external-link-alt"></i> Кушодан
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="demo-info">
+                    <p>Пас аз кушодани саҳифаи кормандон, онҳо танҳо номи худро мебинанд ва метавонанд ҳозирбуди худро сабт кунанд.</p>
+                    <p style="margin-top: 10px; font-size: 13px;">Кормандон наметавонанд маълумоти дигаронро бинанд, таҳрир кунанд ё ҳазф кунанд.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Саҳифаи корманд (ҳозирбуд) -->
+        <div id="attendance-page" class="page">
+            <header>
+                <div class="header-left">
+                    <button id="back-to-employee-page-btn" class="icon-btn" title="Ба саҳифаи кормандон">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <h1 id="employee-fullname"></h1>
+                </div>
+                <div class="header-right">
+                    <button id="attendance-history-btn" class="btn secondary-btn">
+                        <i class="fas fa-history"></i> 
+                        <span class="desktop-only">Таърихча</span>
+                    </button>
+                </div>
+            </header>
+            
+            <div class="content">
+                <div class="attendance-container">
+                    <div class="attendance-card">
+                        <!-- Санаи фиксированӣ, ки корманд наметавонад тағир диҳад -->
+                        <div class="fixed-date-display">
+                            <h3>Санаи имрӯз</h3>
+                            <div id="current-date-display" class="date-value">
+                                <!-- Санаи имрӯз дар ин ҷо нишон дода мешавад -->
+                            </div>
+                            <p style="margin-top: 10px; font-size: 14px; color: #666;">
+                                <i class="fas fa-info-circle"></i> Шумо фақат метавонед ҳозирбуди имрӯзи худро сабт кунед. Сана тавассути система муайян карда мешавад.
+                            </p>
+                        </div>
+                        
+                        <div class="status-selector">
+                            <h3>Қайд кардани вақт</h3>
+                            <div class="status-options">
+                                <div class="status-option" data-status="start">
+                                    <div class="status-icon present">
+                                        <i class="fas fa-play"></i>
+                                    </div>
+                                    <span>Оғози кор</span>
+                                </div>
+                                <div class="status-option" data-status="end">
+                                    <div class="status-icon absent">
+                                        <i class="fas fa-flag-checkered"></i>
+                                    </div>
+                                    <span>Анҷоми кор</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="current-status">
+                            <h3>Ҳолати интихобшуда:</h3>
+                            <div id="selected-status-display">
+                                <span class="status-badge default">Ҳеҷ кадом интихоб нашудааст</span>
+                            </div>
+                        </div>
+                        
+                        <button id="save-attendance-btn" class="btn primary-btn large-btn" disabled>
+                            <i class="fas fa-save"></i> Сабти вақт
+                        </button>
+                        
+                        <div style="margin-top: 20px; color: #666; font-size: 14px;">
+                            <i class="fas fa-info-circle"></i> Пас аз сабти ҳозирбуд, ба саҳифаи кормандон бармегардед.
+                        </div>
+                    </div>
+                    
+                    <div class="history-container" style="display: none;">
+                        <h2>Таърихчаи ҳозирбуд</h2>
+                        <div class="history-list" id="attendance-history">
+                            <!-- Таърихча дар ин ҷо бо JavaScript пур карда мешавад -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Саҳифаи ҳисобот -->
+        <div id="reports-page" class="page">
+            <header>
+                <div class="header-left">
+                    <button id="back-from-reports-btn" class="icon-btn" title="Ба панели администратор">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <h1>Ҳисобот</h1>
+                </div>
+                <div class="header-right">
+                    <button id="export-report-btn" class="btn primary-btn">
+                        <i class="fas fa-download"></i> 
+                        <span class="desktop-only">Export Excel</span>
+                        <span class="mobile-only">Excel</span>
+                    </button>
+                </div>
+            </header>
+            
+            <div class="content">
+                <div class="reports-container">
+                    <div class="report-filters">
+                        <div class="filter-group">
+                            <label for="report-type">Намуди ҳисобот:</label>
+                            <select id="report-type">
+                                <option value="week">Ҳафта</option>
+                                <option value="month" selected>Моҳ</option>
+                                <option value="custom">Диапазони ихтиёрӣ</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group" id="month-selector">
+                            <label for="report-month">Моҳ:</label>
+                            <select id="report-month">
+                                <option value="0">Январ</option>
+                                <option value="1">Феврал</option>
+                                <option value="2">Март</option>
+                                <option value="3">Апрел</option>
+                                <option value="4">Май</option>
+                                <option value="5">Июн</option>
+                                <option value="6">Июл</option>
+                                <option value="7">Август</option>
+                                <option value="8">Сентябр</option>
+                                <option value="9">Октябр</option>
+                                <option value="10">Ноябр</option>
+                                <option value="11">Декабр</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group" id="year-selector">
+                            <label for="report-year">Сол:</label>
+                            <input type="number" id="report-year" min="2020" max="2030" value="2024">
+                        </div>
+                        
+                        <div class="filter-group" id="custom-range-selector" style="display: none;">
+                            <label>Диапазони сана:</label>
+                            <div class="date-range-selector">
+                                <input type="date" id="start-date">
+                                <span>то</span>
+                                <input type="date" id="end-date">
+                            </div>
+                        </div>
+                        
+                        <button id="generate-report-btn" class="btn primary-btn">
+                            <i class="fas fa-chart-line"></i> Сохтани ҳисобот
+                        </button>
+                    </div>
+                    
+                    <div class="report-results">
+                        <div id="report-table-container">
+                            <!-- Ҷадвали ҳисобот дар ин ҷо бо JavaScript пур карда мешавад -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Модалии воридшавии корманд -->
+        <div id="employee-login-modal" class="modal">
+            <div class="modal-content small-modal">
+                <div class="modal-header">
+                    <h2 id="employee-login-title">Воридшавӣ</h2>
+                    <button id="close-employee-modal-btn" class="close-btn">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p>Лутфан пароли худро барои сабти ҳозирбуд ворид кунед:</p>
+                    <p id="employee-login-name" style="font-weight: bold; margin: 10px 0;"></p>
+                    
+                    <div class="form-group password-input-container">
+                        <label for="employee-login-password">Пароли шахсӣ</label>
+                        <input type="password" id="employee-login-password" placeholder="Пароли худро ворид кунед">
+                        <button type="button" class="password-toggle" id="toggle-employee-password">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    
+                    <div id="employee-login-error" style="color: #e74c3c; margin-top: 10px; display: none;">
+                        <i class="fas fa-exclamation-circle"></i> Парол нодуруст аст!
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="cancel-employee-login-btn" class="btn secondary-btn">Бекор кардан</button>
+                    <button id="confirm-employee-login-btn" class="btn primary-btn">Воридшавӣ</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Паёми хатогиҳо/муваффақият -->
+        <div id="message-toast" class="toast">
+            <div class="toast-content">
+                <i id="toast-icon" class="fas fa-info-circle"></i>
+                <span id="toast-message"></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Китобхонаи SheetJS барои экспорт ба Excel -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <!-- Supabase JS (for database) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    
+    <script>
+        // Системаи Қайдҳозирбуд - тамоми логика дар як файл
+        window.App = {
+            currentPage: 'start',
+            currentEmployee: null,
+            selectedEmployeeForLogin: null,
+            currentDate: null, // Санаи имрӯз, ки корманд наметавонад тағир диҳад
+            isMobile: false,
+            lastTapTime: 0, // Барои ҳифзи тапҳои ногаҳонӣ
+            tapDelay: 300, // Фосила барои тапҳои ногаҳонӣ (миллисония)
+            lastTappedEmployeeId: null, // Барои double tap дар мобил
+            doubleTapWindow: 450, // Фосила (мс) барои ду бор пахш кардан // Фосила барои тапҳои ногаҳонӣ (миллисония)
+            
+            init: async function() {
+                console.log('Инициализацияи барнома оғоз шуд');
+                // Supabase: аввал пайваст мешавем ва маълумотро мегирем
+                this.initSupabase();
+                await this.loadData();
+                this.checkFirstLogin();
+                this.setupEventListeners();
+                this.setupPasswordToggles();
+                this.setCurrentDate();
+                this.setDefaultReportDates();
+                this.setupMobileFeatures();
+                console.log('Барнома инициализация шуд');
+            },
+            
+            setupMobileFeatures: function() {
+                // Санҷиш, оё корбар дар мобил аст
+                this.isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+                if (this.isMobile) {
+                    console.log('Корбар дар мобил аст');
+                    this.addTouchEvents();
+                    this.preventZoomOnInput();
+                }
+            },
+            
+            addTouchEvents: function() {
+                // Иловаи дастурҳо барои тап кардан (touch events)
+                document.querySelectorAll('.btn, .icon-btn, .status-option').forEach(element => {
+                    element.addEventListener('touchstart', function(e) {
+                        this.style.opacity = '0.8';
+                    }, { passive: true });
+                    
+                    element.addEventListener('touchend', function(e) {
+                        this.style.opacity = '1';
+                    }, { passive: true });
+                });
+                
+                // Барои карточкаҳои кормандон
+                document.addEventListener('touchstart', (e) => {
+                    if (e.target.closest('.employee-card-simple')) {
+                        const card = e.target.closest('.employee-card-simple');
+                        card.style.opacity = '0.8';
+                    }
+                }, { passive: true });
+                
+                document.addEventListener('touchend', (e) => {
+                    if (e.target.closest('.employee-card-simple')) {
+                        const card = e.target.closest('.employee-card-simple');
+                        card.style.opacity = '1';
+                    }
+                }, { passive: true });
+            },
+            
+            preventZoomOnInput: function() {
+                // Пешгирии зуми автоматӣ дар майдонҳои воридот дар iOS
+                document.querySelectorAll('input, select, textarea').forEach(input => {
+                    input.addEventListener('focus', function() {
+                        if (this.type === 'date' || this.type === 'time') {
+                            return; // Барои календарҳо зуми автомативӣ лозим аст
+                        }
+                        // Нигоҳ доштани андозаи шрифт
+                        const initialFontSize = window.getComputedStyle(this).fontSize;
+                        this.style.fontSize = initialFontSize;
+                    });
+                });
+            },
+            
+            setCurrentDate: function() {
+                // Ҳамеша санаи имрӯзро нишон медиҳем
+                const today = new Date();
+                this.currentDate = today.toISOString().split('T')[0]; // Формати YYYY-MM-DD
+                console.log('Санаи имрӯз муайян шуд:', this.currentDate);
+            },
+            
+            checkFirstLogin: function() {
+                // Пароли администратор барои воридшавӣ ба панели администратор
+                const adminPassword = localStorage.getItem('adminPassword');
+                if (!adminPassword) {
+                    localStorage.setItem('adminPassword', '1234');
+                }
+
+                // Пароли махсус барои кушодани саҳифаи кормандон
+                const employeePagePassword = localStorage.getItem('employeePagePassword');
+                if (!employeePagePassword) {
+                    localStorage.setItem('employeePagePassword', 'emp1234');
+                }
+
+                // Агар рӯйхати кормандон холӣ бошад — намуна илова мекунем (барои санҷиш)
+                const employees = this.getEmployees();
+                if (!employees || employees.length === 0) {
+                    this.saveEmployees([
+                        { id: 1, firstName: "Аҳмад", lastName: "Аҳмадов", password: "1234" },
+                        { id: 2, firstName: "Саид", lastName: "Саидов", password: "1234" },
+                        { id: 3, firstName: "Муҳаммад", lastName: "Муҳаммадов", password: "1234" }
+                    ]);
+                }
+            },
+
+            setupPasswordToggles: function() {
+                // Тугмаи нишон додани парол дар модалии корманд
+                const togglePasswordBtn = document.getElementById('toggle-password');
+                const passwordInput = document.getElementById('employee-password');
+                
+                if (togglePasswordBtn && passwordInput) {
+                    togglePasswordBtn.addEventListener('click', function() {
+                        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                        passwordInput.setAttribute('type', type);
+                        this.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
+                    });
+                    
+                    // Барои мобил, touch event низ илова мекунем
+                    togglePasswordBtn.addEventListener('touchstart', function(e) {
+                        e.preventDefault();
+                        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                        passwordInput.setAttribute('type', type);
+                        this.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
+                    }, { passive: false });
+                }
+                
+                // Тугмаи нишон додани парол дар модалии воридшавии корманд
+                const toggleEmployeePasswordBtn = document.getElementById('toggle-employee-password');
+                const employeePasswordInput = document.getElementById('employee-login-password');
+                
+                if (toggleEmployeePasswordBtn && employeePasswordInput) {
+                    toggleEmployeePasswordBtn.addEventListener('click', function() {
+                        const type = employeePasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                        employeePasswordInput.setAttribute('type', type);
+                        this.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
+                    });
+                    
+                    // Барои мобил
+                    toggleEmployeePasswordBtn.addEventListener('touchstart', function(e) {
+                        e.preventDefault();
+                        const type = employeePasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                        employeePasswordInput.setAttribute('type', type);
+                        this.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
+                    }, { passive: false });
+                }
+            },
+            
+            setupEventListeners: function() {
+                console.log('Оғози насби дастурҳо');
+                
+                // Саҳифаи аввал
+                const adminLoginBtn = document.getElementById('admin-login-btn');
+                const employeeAccessBtn = document.getElementById('employee-access-btn');
+                
+                if (adminLoginBtn) {
+                    adminLoginBtn.addEventListener('click', () => {
+                        console.log('Тугмаи администратор клик шуд');
+                        this.showPage('admin-login');
+                    });
+                    
+                    // Барои мобил
+                    adminLoginBtn.addEventListener('touchstart', (e) => {
+                        e.preventDefault();
+                        this.showPage('admin-login');
+                    }, { passive: false });
+                }
+                
+                if (employeeAccessBtn) {
+                    employeeAccessBtn.addEventListener('click', () => {
+                        console.log('Тугмаи кормандон клик шуд');
+                        this.showPage('open-employee-page-login');
+                    });
+                    
+                    // Барои мобил
+                    employeeAccessBtn.addEventListener('touchstart', (e) => {
+                        e.preventDefault();
+                        this.showPage('open-employee-page-login');
+                    }, { passive: false });
+                }
+                
+                // Саҳифаи воридшавии администратор
+                const adminLoginSubmitBtn = document.getElementById('admin-login-submit-btn');
+                if (adminLoginSubmitBtn) {
+                    adminLoginSubmitBtn.addEventListener('click', () => this.handleAdminLogin());
+                }
+                
+                const adminPasswordInput = document.getElementById('admin-password');
+                if (adminPasswordInput) {
+                    adminPasswordInput.addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter') this.handleAdminLogin();
+                    });
+                }
+                
+                const backToStartFromAdminBtn = document.getElementById('back-to-start-from-admin');
+                if (backToStartFromAdminBtn) {
+                    backToStartFromAdminBtn.addEventListener('click', () => this.showPage('start'));
+                }
+                
+                // Саҳифаи администратор
+                const adminBackToStartBtn = document.getElementById('admin-back-to-start');
+                if (adminBackToStartBtn) {
+                    adminBackToStartBtn.addEventListener('click', () => this.showPage('start'));
+                }
+                
+                const openEmployeePageBtn = document.getElementById('open-employee-page-btn');
+                if (openEmployeePageBtn) {
+                    openEmployeePageBtn.addEventListener('click', () => this.showPage('open-employee-page-login'));
+                }
+                
+                const reportsBtn = document.getElementById('reports-btn');
+                if (reportsBtn) {
+                    reportsBtn.addEventListener('click', () => this.showPage('reports'));
+                }
+                
+                const addEmployeeBtn = document.getElementById('add-employee-btn');
+                if (addEmployeeBtn) {
+                    addEmployeeBtn.addEventListener('click', () => this.openAddEmployeeModal());
+                }
+                
+                const searchEmployeeInput = document.getElementById('search-employee');
+                if (searchEmployeeInput) {
+                    searchEmployeeInput.addEventListener('input', (e) => this.searchEmployees(e.target.value));
+                }
+                
+                // Танзимотҳо (settings dropdown)
+                const settingsBtn = document.getElementById('settings-btn');
+                if (settingsBtn) {
+                    settingsBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const dropdown = document.getElementById('settings-dropdown');
+                        dropdown.classList.toggle('active');
+                    });
+                }
+                
+                // Пӯшидани dropdown баъди клик дар берун
+                document.addEventListener('click', (e) => {
+                    const dropdown = document.getElementById('settings-dropdown');
+                    if (dropdown && !dropdown.contains(e.target)) {
+                        dropdown.classList.remove('active');
+                    }
+                });
+                
+                // Тугмаҳои танзимотҳо
+                const changeAdminPasswordBtn = document.getElementById('change-admin-password-btn');
+                if (changeAdminPasswordBtn) {
+                    changeAdminPasswordBtn.addEventListener('click', () => {
+                        this.openPasswordSettingsModal('admin');
+                        document.getElementById('settings-dropdown').classList.remove('active');
+                    });
+                }
+                
+                const changeEmployeePagePasswordBtn = document.getElementById('change-employee-page-password-btn');
+                if (changeEmployeePagePasswordBtn) {
+                    changeEmployeePagePasswordBtn.addEventListener('click', () => {
+                        this.openPasswordSettingsModal('employee');
+                        document.getElementById('settings-dropdown').classList.remove('active');
+                    });
+                }
+                
+                // Табҳо дар модалии танзими паролҳо
+                document.querySelectorAll('.tab-button').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const tabId = e.target.getAttribute('data-tab');
+                        this.switchPasswordTab(tabId);
+                    });
+                });
+                
+                // Ивази пароли администратор
+                const changeAdminPasswordSubmitBtn = document.getElementById('change-admin-password-submit');
+                if (changeAdminPasswordSubmitBtn) {
+                    changeAdminPasswordSubmitBtn.addEventListener('click', () => this.changeAdminPassword());
+                }
+                
+                // Ивази пароли саҳифаи кормандон
+                const changeEmployeePagePasswordSubmitBtn = document.getElementById('change-employee-page-password-submit');
+                if (changeEmployeePagePasswordSubmitBtn) {
+                    changeEmployeePagePasswordSubmitBtn.addEventListener('click', () => this.changeEmployeePagePassword());
+                }
+                
+                // Пӯшидани модалии танзими паролҳо
+                const closePasswordSettingsModalBtn = document.getElementById('close-password-settings-modal-btn');
+                if (closePasswordSettingsModalBtn) {
+                    closePasswordSettingsModalBtn.addEventListener('click', () => this.closePasswordSettingsModal());
+                }
+                
+                const cancelPasswordSettingsBtn = document.getElementById('cancel-password-settings-btn');
+                if (cancelPasswordSettingsBtn) {
+                    cancelPasswordSettingsBtn.addEventListener('click', () => this.closePasswordSettingsModal());
+                }
+                
+                // Саҳифаи кушодани саҳифаи кормандон
+                const backToStartFromEmployeeLoginBtn = document.getElementById('back-to-start-from-employee-login');
+                if (backToStartFromEmployeeLoginBtn) {
+                    backToStartFromEmployeeLoginBtn.addEventListener('click', () => this.showPage('start'));
+                }
+                
+                const confirmOpenEmployeePageBtn = document.getElementById('confirm-open-employee-page');
+                if (confirmOpenEmployeePageBtn) {
+                    confirmOpenEmployeePageBtn.addEventListener('click', () => this.openEmployeePage());
+                }
+                
+                const openEmployeePasswordInput = document.getElementById('open-employee-password');
+                if (openEmployeePasswordInput) {
+                    openEmployeePasswordInput.addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter') this.openEmployeePage();
+                    });
+                }
+                
+                // Саҳифаи кормандон
+                const closeEmployeePageBtn = document.getElementById('close-employee-page-btn');
+                if (closeEmployeePageBtn) {
+                    closeEmployeePageBtn.addEventListener('click', () => this.showPage('start'));
+                }
+                
+                // Нав: Ҷустуҷӯ дар саҳифаи кормандон
+                const employeeSearchInput = document.getElementById('employee-search-input');
+                if (employeeSearchInput) {
+                    employeeSearchInput.addEventListener('input', (e) => this.filterEmployees(e.target.value));
+                }
+                
+                // Ҳозирбуд
+                const backToEmployeePageBtn = document.getElementById('back-to-employee-page-btn');
+                if (backToEmployeePageBtn) {
+                    backToEmployeePageBtn.addEventListener('click', () => this.showPage('employee'));
+                }
+                
+                const saveAttendanceBtn = document.getElementById('save-attendance-btn');
+                if (saveAttendanceBtn) {
+                    saveAttendanceBtn.addEventListener('click', () => this.saveAttendance());
+                }
+                
+                const attendanceHistoryBtn = document.getElementById('attendance-history-btn');
+                if (attendanceHistoryBtn) {
+                    attendanceHistoryBtn.addEventListener('click', () => this.toggleHistory());
+                }
+                
+                // Ҳолати ҳозирбуд
+                document.querySelectorAll('.status-option').forEach(option => {
+                    option.addEventListener('click', (e) => this.selectStatus(e.currentTarget));
+                    
+                    // Барои мобил
+                    option.addEventListener('touchstart', (e) => {
+                        e.preventDefault();
+                        this.selectStatus(e.currentTarget);
+                    }, { passive: false });
+                });
+                
+                // Ҳисобот
+                const backFromReportsBtn = document.getElementById('back-from-reports-btn');
+                if (backFromReportsBtn) {
+                    backFromReportsBtn.addEventListener('click', () => this.showPage('admin'));
+                }
+                
+                const generateReportBtn = document.getElementById('generate-report-btn');
+                if (generateReportBtn) {
+                    generateReportBtn.addEventListener('click', () => this.generateReport());
+                }
+                
+                const reportTypeSelect = document.getElementById('report-type');
+                if (reportTypeSelect) {
+                    reportTypeSelect.addEventListener('change', (e) => this.toggleReportFilters(e.target.value));
+                }
+                
+                const exportReportBtn = document.getElementById('export-report-btn');
+                if (exportReportBtn) {
+                    exportReportBtn.addEventListener('click', () => this.exportReportToExcel());
+                }
+                
+                const startDateInput = document.getElementById('start-date');
+                if (startDateInput) {
+                    startDateInput.addEventListener('change', () => this.validateDateRange());
+                }
+                
+                const endDateInput = document.getElementById('end-date');
+                if (endDateInput) {
+                    endDateInput.addEventListener('change', () => this.validateDateRange());
+                }
+                
+                // Модалии илова/таҳрири корманд
+                const closeModalBtn = document.getElementById('close-modal-btn');
+                if (closeModalBtn) {
+                    closeModalBtn.addEventListener('click', () => this.closeModal());
+                }
+                
+                const cancelModalBtn = document.getElementById('cancel-modal-btn');
+                if (cancelModalBtn) {
+                    cancelModalBtn.addEventListener('click', () => this.closeModal());
+                }
+                
+                const saveEmployeeBtn = document.getElementById('save-employee-btn');
+                if (saveEmployeeBtn) {
+                    saveEmployeeBtn.addEventListener('click', () => this.saveEmployee());
+                }
+                
+                const employeePasswordInput = document.getElementById('employee-password');
+                if (employeePasswordInput) {
+                    employeePasswordInput.addEventListener('input', (e) => this.toggleConfirmPassword(e.target.value));
+                }
+                
+                // Модалии ҳазфи корманд
+                const closeDeleteModalBtn = document.getElementById('close-delete-modal-btn');
+                if (closeDeleteModalBtn) {
+                    closeDeleteModalBtn.addEventListener('click', () => this.closeDeleteModal());
+                }
+                
+                const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
+                if (cancelDeleteBtn) {
+                    cancelDeleteBtn.addEventListener('click', () => this.closeDeleteModal());
+                }
+                
+                const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+                if (confirmDeleteBtn) {
+                    confirmDeleteBtn.addEventListener('click', () => this.confirmDeleteEmployee());
+                }
+                
+                // Модалии воридшавии корманд
+                const closeEmployeeModalBtn = document.getElementById('close-employee-modal-btn');
+                if (closeEmployeeModalBtn) {
+                    closeEmployeeModalBtn.addEventListener('click', () => this.closeEmployeeLoginModal());
+                }
+                
+                const cancelEmployeeLoginBtn = document.getElementById('cancel-employee-login-btn');
+                if (cancelEmployeeLoginBtn) {
+                    cancelEmployeeLoginBtn.addEventListener('click', () => this.closeEmployeeLoginModal());
+                }
+                
+                const confirmEmployeeLoginBtn = document.getElementById('confirm-employee-login-btn');
+                if (confirmEmployeeLoginBtn) {
+                    confirmEmployeeLoginBtn.addEventListener('click', () => this.confirmEmployeeLogin());
+                }
+                
+                const employeeLoginPasswordInput = document.getElementById('employee-login-password');
+                if (employeeLoginPasswordInput) {
+                    employeeLoginPasswordInput.addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter') this.confirmEmployeeLogin();
+                    });
+                }
+                
+                // Export/Import
+                const exportJsonBtn = document.getElementById('export-json-btn');
+                if (exportJsonBtn) {
+                    exportJsonBtn.addEventListener('click', () => this.exportToJSON());
+                }
+                
+                const importJsonBtn = document.getElementById('import-json-btn');
+                if (importJsonBtn) {
+                    importJsonBtn.addEventListener('click', () => document.getElementById('json-file-input').click());
+                }
+                
+                const jsonFileInput = document.getElementById('json-file-input');
+                if (jsonFileInput) {
+                    jsonFileInput.addEventListener('change', (e) => this.importFromJSON(e));
+                }
+                
+                const exportExcelBtn = document.getElementById('export-excel-btn');
+                if (exportExcelBtn) {
+                    exportExcelBtn.addEventListener('click', () => this.exportToExcel());
+                }
+                
+                console.log('Дастурҳо насб карда шуданд');
+            },
+            
+            showPage: function(pageName) {
+                console.log('Нишон додани саҳифа:', pageName);
+                document.querySelectorAll('.page').forEach(page => {
+                    page.classList.remove('active');
+                });
+                
+                const pageElement = document.getElementById(`${pageName}-page`);
+                if (pageElement) {
+                    pageElement.classList.add('active');
+                    this.currentPage = pageName;
+                    
+                    if (pageName === 'admin') {
+                        this.loadEmployeesForAdmin();
+                    } else if (pageName === 'employee') {
+                        this.loadEmployeesForEmployeePage();
+                    } else if (pageName === 'attendance') {
+                        this.loadAttendancePage();
+                    } else if (pageName === 'reports') {
+                        this.toggleReportFilters('month');
+                    }
+                    
+                    // Пӯшидани dropdown-ҳо ва модалиҳо баъди тағири саҳифа
+                    const settingsDropdown = document.getElementById('settings-dropdown');
+                    if (settingsDropdown) {
+                        settingsDropdown.classList.remove('active');
+                    }
+                    
+                    // Пӯшидани модалиҳо
+                    document.querySelectorAll('.modal.active').forEach(modal => {
+                        modal.classList.remove('active');
+                    });
+                    
+                    // Тоза кардани ҷустуҷӯ дар саҳифаи кормандон
+                    if (pageName === 'employee') {
+                        const searchInput = document.getElementById('employee-search-input');
+                        if (searchInput) {
+                            searchInput.value = '';
+                        }
+                    }
+                } else {
+                    console.error('Саҳифа ёфт нашуд:', pageName);
+                }
+            },
+            
+            handleAdminLogin: function() {
+                const login = document.getElementById('admin-login').value.trim();
+                const password = document.getElementById('admin-password').value;
+                const storedPassword = localStorage.getItem('adminPassword') || '1234';
+                
+                if (login === 'admin' && password === storedPassword) {
+                    this.showPage('admin');
+                    this.showToast('Бо муваффақият ворид шудед', 'success');
+                } else {
+                    this.showToast('Логин ё парол нодуруст аст', 'error');
+                }
+            },
+            
+            openEmployeePage: function() {
+                const password = document.getElementById('open-employee-password').value;
+                const storedPassword = localStorage.getItem('employeePagePassword') || 'emp1234';
+                
+                if (password === storedPassword) {
+                    this.showPage('employee');
+                    document.getElementById('open-employee-password').value = '';
+                    this.showToast('Саҳифаи кормандон кушода шуд', 'success');
+                } else {
+                    this.showToast('Пароли саҳифаи кормандон нодуруст аст', 'error');
+                }
+            },
+            
+            openPasswordSettingsModal: function(defaultTab = 'admin') {
+                // Тоза кардани майдонҳо
+                document.getElementById('current-admin-password').value = '';
+                document.getElementById('new-admin-password').value = '';
+                document.getElementById('confirm-new-admin-password').value = '';
+                document.getElementById('current-employee-page-password').value = '';
+                document.getElementById('new-employee-page-password').value = '';
+                document.getElementById('confirm-new-employee-page-password').value = '';
+                
+                // Нишон додани таби мувофиқ
+                this.switchPasswordTab(defaultTab === 'admin' ? 'admin-password-tab' : 'employee-page-password-tab');
+                
+                // Кушодани модалӣ
+                document.getElementById('password-settings-modal').classList.add('active');
+            },
+            
+            switchPasswordTab: function(tabId) {
+                // Хомӯш кардани ҳамаи табҳо
+                document.querySelectorAll('.tab-content').forEach(tab => {
+                    tab.classList.remove('active');
+                });
+                
+                document.querySelectorAll('.tab-button').forEach(button => {
+                    button.classList.remove('active');
+                });
+                
+                // Фаъол кардани таби интихобшуда
+                document.getElementById(tabId).classList.add('active');
+                document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
+            },
+            
+            closePasswordSettingsModal: function() {
+                document.getElementById('password-settings-modal').classList.remove('active');
+            },
+            
+            changeAdminPassword: function() {
+                const currentPassword = document.getElementById('current-admin-password').value;
+                const newPassword = document.getElementById('new-admin-password').value;
+                const confirmNewPassword = document.getElementById('confirm-new-admin-password').value;
+                const storedPassword = localStorage.getItem('adminPassword') || '1234';
+                
+                // Санҷидиҳӣ
+                if (!currentPassword) {
+                    this.showToast('Лутфан пароли куҳнаро ворид кунед', 'error');
+                    return;
+                }
+                
+                if (currentPassword !== storedPassword) {
+                    this.showToast('Пароли куҳна нодуруст аст', 'error');
+                    return;
+                }
+                
+                if (newPassword.length < 4) {
+                    this.showToast('Пароли нав бояд ҳадди ақал 4 рамз дошта бошад', 'error');
+                    return;
+                }
+                
+                if (newPassword !== confirmNewPassword) {
+                    this.showToast('Паролҳои нав мувофиқ нестанд', 'error');
+                    return;
+                }
+                
+                // Нигоҳ доштани пароли нав
+                localStorage.setItem('adminPassword', newPassword);
+                
+                // Тоза кардани майдонҳо
+                document.getElementById('current-admin-password').value = '';
+                document.getElementById('new-admin-password').value = '';
+                document.getElementById('confirm-new-admin-password').value = '';
+                
+                this.showToast('Пароли администратор бо муваффақият иваз шуд', 'success');
+                this.closePasswordSettingsModal();
+            },
+            
+            changeEmployeePagePassword: function() {
+                const currentPassword = document.getElementById('current-employee-page-password').value;
+                const newPassword = document.getElementById('new-employee-page-password').value;
+                const confirmNewPassword = document.getElementById('confirm-new-employee-page-password').value;
+                const storedPassword = localStorage.getItem('employeePagePassword') || 'emp1234';
+                
+                // Санҷидиҳӣ
+                if (!currentPassword) {
+                    this.showToast('Лутфан пароли куҳнаро ворид кунед', 'error');
+                    return;
+                }
+                
+                if (currentPassword !== storedPassword) {
+                    this.showToast('Пароли куҳнаи саҳифаи кормандон нодуруст аст', 'error');
+                    return;
+                }
+                
+                if (newPassword.length < 4) {
+                    this.showToast('Пароли нав бояд ҳадди ақал 4 рамз дошта бошад', 'error');
+                    return;
+                }
+                
+                if (newPassword !== confirmNewPassword) {
+                    this.showToast('Паролҳои нав мувофиқ нестанд', 'error');
+                    return;
+                }
+                
+                // Нигоҳ доштани пароли нав
+                localStorage.setItem('employeePagePassword', newPassword);
+                
+                // Тоза кардани майдонҳо
+                document.getElementById('current-employee-page-password').value = '';
+                document.getElementById('new-employee-page-password').value = '';
+                document.getElementById('confirm-new-employee-page-password').value = '';
+                
+                this.showToast('Пароли саҳифаи кормандон бо муваффақият иваз шуд', 'success');
+                this.closePasswordSettingsModal();
+            },
+            
+            loadEmployeesForAdmin: function(searchTerm = '') {
+                const employees = this.getEmployees();
+                const employeeList = document.getElementById('admin-employee-list');
+                
+                if (!employeeList) return;
+                
+                if (employees.length === 0) {
+                    employeeList.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-users"></i>
+                            <h3>Кормандон вуҷуд надоранд</h3>
+                            <p>Барои илова кардани корманд, тугмаи "Иловаи корманд"-ро пахш кунед</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                let filteredEmployees = employees;
+                if (searchTerm) {
+                    const term = searchTerm.toLowerCase();
+                    filteredEmployees = employees.filter(emp => 
+                        emp.firstName.toLowerCase().includes(term) || 
+                        emp.lastName.toLowerCase().includes(term) ||
+                        `${emp.firstName} ${emp.lastName}`.toLowerCase().includes(term)
+                    );
+                }
+                
+                
+                filteredEmployees = this.sortEmployeesByName(filteredEmployees);
+                
+                employeeList.innerHTML = filteredEmployees.map(employee => `
+                    <div class="employee-card">
+                        <div class="employee-info">
+                            <h3>${employee.firstName} ${employee.lastName}</h3>
+                            <p>ID: ${employee.id} | Парол: ${employee.password ? '***' : 'Не'}</p>
+                            <p style="font-size: 13px; color: #888; margin-top: 5px;">
+                                <i class="fas fa-calendar-check"></i> Ҳозирбуд: ${this.getEmployeeAttendanceCount(employee.id)} маротиба
+                            </p>
+                        </div>
+                        <div class="employee-actions">
+                            <button class="edit-btn" onclick="App.editEmployee(${employee.id})" title="Таҳрир">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="delete-btn" onclick="App.deleteEmployee(${employee.id})" title="Ҳазф">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            },
+            
+            loadEmployeesForEmployeePage: function(searchTerm = '') {
+                const employees = this.getEmployees();
+                const employeeList = document.getElementById('employee-list-simple');
+                
+                if (!employeeList) return;
+                
+                if (employees.length === 0) {
+                    employeeList.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-users"></i>
+                            <h3>Кормандон вуҷуд надоранд</h3>
+                            <p>Лутфан ба администратор гуред, то кормандонро илова кунад</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                let filteredEmployees = employees;
+                if (searchTerm) {
+                    const term = searchTerm.toLowerCase();
+                    filteredEmployees = employees.filter(emp => 
+                        emp.firstName.toLowerCase().includes(term) || 
+                        emp.lastName.toLowerCase().includes(term) ||
+                        `${emp.firstName} ${emp.lastName}`.toLowerCase().includes(term)
+                    );
+                }
+                
+                const sortedEmployees = this.sortEmployeesByName(filteredEmployees);
+                
+                employeeList.innerHTML = sortedEmployees.map(employee => `
+                    <div class="employee-card-simple" data-id="${employee.id}">
+                        <div class="employee-icon" style="font-size: 36px; color: #4a6cf7; margin-bottom: 10px;">
+                            <i class="fas fa-user-circle"></i>
+                        </div>
+                        <h3>${employee.firstName} ${employee.lastName}</h3>
+                        <p>Барои сабти ҳозирбуд, номи худро пахш кунед</p>
+                    </div>
+                `).join('');
+                
+                // Илова кардани дастурҳои нав барои пешгирии тапҳои ногаҳонӣ
+                this.setupEmployeeCardClickHandlers();
+            },
+            
+            setupEmployeeCardClickHandlers: function() {
+                document.querySelectorAll('.employee-card-simple').forEach(card => {
+                    // Хомӯш кардани ҳамаи дастурҳои қадим
+                    card.removeEventListener('click', this.handleEmployeeCardClick);
+                    card.removeEventListener('touchstart', this.handleEmployeeCardTouch);
+                    
+                    // Дастурҳои нав
+                    card.addEventListener('click', this.handleEmployeeCardClick.bind(this));
+                    card.addEventListener('touchstart', this.handleEmployeeCardTouch.bind(this), { passive: false });
+                });
+            },
+            
+            handleEmployeeCardClick: function(e) {
+    // Дар мобил танҳо touchstart-ро истифода мебарем, то "ghost click" нашавад
+    if (this.isMobile) return;
+
+    const employeeId = parseInt(e.currentTarget.getAttribute('data-id'));
+    this.openEmployeeLoginModal(employeeId);
+},
+
+// Нав: Барои мобил — кушодан фақат бо ду бор пахш кардан (double tap)
+handleEmployeeCardTouch: function(e) {
+    e.preventDefault(); // Пешгирии клик-и дуюм (ghost click)
+
+    const employeeId = parseInt(e.currentTarget.getAttribute('data-id'));
+    const currentTime = new Date().getTime();
+    const tapLength = currentTime - this.lastTapTime;
+
+    // Агар ҳамин кормандро дар мӯҳлати муайян дубор пахш карданд -> кушодан
+    if (this.lastTappedEmployeeId === employeeId && tapLength <= this.doubleTapWindow && tapLength > 0) {
+        this.lastTapTime = 0;
+        this.lastTappedEmployeeId = null;
+        this.clearEmployeeSelection();
+        this.openEmployeeLoginModal(employeeId);
+        return;
+    }
+
+    // Пахши аввал: интихоб + паём
+    this.lastTapTime = currentTime;
+    this.lastTappedEmployeeId = employeeId;
+    this.markEmployeeSelected(employeeId);
+    this.showToast('Барои кушодан дубор пахш кунед', 'warning');
+},
+
+// Нав: интихоби визуалӣ дар саҳифаи кормандон
+markEmployeeSelected: function(employeeId) {
+    document.querySelectorAll('.employee-card-simple').forEach(card => {
+        card.classList.remove('selected');
+    });
+    const card = document.querySelector(`.employee-card-simple[data-id="${employeeId}"]`);
+    if (card) card.classList.add('selected');
+},
+
+clearEmployeeSelection: function() {
+    document.querySelectorAll('.employee-card-simple').forEach(card => {
+        card.classList.remove('selected');
+    });
+},
+            
+            filterEmployees: function(searchTerm) {
+                this.loadEmployeesForEmployeePage(searchTerm);
+            },
+            
+            getEmployeeAttendanceCount: function(employeeId) {
+                const attendance = this.getAttendanceRecords();
+                return attendance.filter(record => record.employeeId === employeeId).length;
+            },
+            
+            searchEmployees: function(term) {
+                this.loadEmployeesForAdmin(term);
+            },
+            
+            openAddEmployeeModal: function() {
+                document.getElementById('modal-title').textContent = 'Иловаи корманд';
+                document.getElementById('employee-firstname').value = '';
+                document.getElementById('employee-lastname').value = '';
+                document.getElementById('employee-password').value = '';
+                document.getElementById('employee-password').type = 'password';
+                const togglePasswordBtn = document.getElementById('toggle-password');
+                if (togglePasswordBtn) togglePasswordBtn.innerHTML = '<i class="fas fa-eye"></i>';
+                document.getElementById('confirm-password-group').style.display = 'none';
+                document.getElementById('confirm-employee-password').value = '';
+                document.getElementById('edit-employee-id').style.display = 'none';
+                document.getElementById('employee-edit-note').style.display = 'none';
+                document.getElementById('add-edit-modal').classList.add('active');
+            },
+            
+            editEmployee: function(id) {
+                const employees = this.getEmployees();
+                const employee = employees.find(emp => emp.id === id);
+                
+                if (employee) {
+                    document.getElementById('modal-title').textContent = 'Таҳрири корманд';
+                    document.getElementById('employee-firstname').value = employee.firstName;
+                    document.getElementById('employee-lastname').value = employee.lastName;
+                    document.getElementById('employee-password').value = '';
+                    document.getElementById('employee-password').type = 'password';
+                    const togglePasswordBtn = document.getElementById('toggle-password');
+                    if (togglePasswordBtn) togglePasswordBtn.innerHTML = '<i class="fas fa-eye"></i>';
+                    document.getElementById('confirm-password-group').style.display = 'none';
+                    document.getElementById('confirm-employee-password').value = '';
+                    document.getElementById('edit-employee-id').textContent = id;
+                    document.getElementById('edit-employee-id').style.display = 'block';
+                    document.getElementById('employee-edit-note').style.display = 'block';
+                    document.getElementById('add-edit-modal').classList.add('active');
+                }
+            },
+            
+            toggleConfirmPassword: function(passwordValue) {
+                const confirmPasswordGroup = document.getElementById('confirm-password-group');
+                const isEditMode = document.getElementById('edit-employee-id').style.display !== 'none';
+                
+                if (passwordValue.length > 0 && !isEditMode) {
+                    confirmPasswordGroup.style.display = 'block';
+                } else if (passwordValue.length === 0 || isEditMode) {
+                    confirmPasswordGroup.style.display = 'none';
+                }
+            },
+            
+            closeModal: function() {
+                document.getElementById('add-edit-modal').classList.remove('active');
+            },
+            
+            saveEmployee: function() {
+                const firstName = document.getElementById('employee-firstname').value.trim();
+                const lastName = document.getElementById('employee-lastname').value.trim();
+                const password = document.getElementById('employee-password').value;
+                const confirmPassword = document.getElementById('confirm-employee-password').value;
+                const editId = document.getElementById('edit-employee-id').textContent;
+                const isEditMode = editId.length > 0;
+                
+                if (!firstName || !lastName) {
+                    this.showToast('Ном ва насабро пур кунед', 'error');
+                    return;
+                }
+                
+                if (!isEditMode && password.length < 4) {
+                    this.showToast('Парол бояд ҳадди ақал 4 рамз дошта бошад', 'error');
+                    return;
+                }
+                
+                if (!isEditMode && password !== confirmPassword) {
+                    this.showToast('Паролҳо мувофиқ нестанд', 'error');
+                    return;
+                }
+                
+                let employees = this.getEmployees();
+                
+                if (isEditMode) {
+                    const id = parseInt(editId);
+                    const index = employees.findIndex(emp => emp.id === id);
+                    if (index !== -1) {
+                        if (password.length >= 4) {
+                            employees[index] = { 
+                                ...employees[index], 
+                                firstName, 
+                                lastName,
+                                password: password
+                            };
+                            this.showToast('Корманд бо пароли нав таҳрир шуд', 'success');
+                        } else {
+                            employees[index] = { 
+                                ...employees[index], 
+                                firstName, 
+                                lastName
+                            };
+                            this.showToast('Корманд бо муваффақият таҳрир шуд', 'success');
+                        }
+                    }
+                } else {
+                    const newId = employees.length > 0 ? Math.max(...employees.map(emp => emp.id)) + 1 : 1;
+                    employees.push({
+                        id: newId,
+                        firstName,
+                        lastName,
+                        password: password
+                    });
+                    this.showToast('Корманд бо муваффақият илова шуд', 'success');
+                }
+                
+                this.saveEmployees(employees);
+                this.loadEmployeesForAdmin();
+                this.closeModal();
+            },
+            
+            deleteEmployee: function(id) {
+                const employees = this.getEmployees();
+                const employee = employees.find(emp => emp.id === id);
+                
+                if (employee) {
+                    document.getElementById('employee-to-delete-name').textContent = 
+                        `${employee.firstName} ${employee.lastName}`;
+                    document.getElementById('delete-confirm-modal').classList.add('active');
+                    document.getElementById('delete-confirm-modal').setAttribute('data-employee-id', id);
+                }
+            },
+            
+            closeDeleteModal: function() {
+                document.getElementById('delete-confirm-modal').classList.remove('active');
+            },
+            
+            confirmDeleteEmployee: function() {
+                const id = parseInt(document.getElementById('delete-confirm-modal').getAttribute('data-employee-id'));
+                let employees = this.getEmployees();
+                
+                this.deleteEmployeeAttendance(id);
+                employees = employees.filter(emp => emp.id !== id);
+                this.saveEmployees(employees);
+                
+                this.loadEmployeesForAdmin();
+                this.closeDeleteModal();
+                this.showToast('Корманд бо муваффақият ҳазф шуд', 'success');
+            },
+            
+            openEmployeeLoginModal: function(employeeId) {
+                const employees = this.getEmployees();
+                const employee = employees.find(emp => emp.id === employeeId);
+                
+                if (employee) {
+                    this.selectedEmployeeForLogin = employeeId;
+                    document.getElementById('employee-login-name').textContent = 
+                        `${employee.firstName} ${employee.lastName}`;
+                    document.getElementById('employee-login-password').value = '';
+                    document.getElementById('employee-login-error').style.display = 'none';
+                    document.getElementById('employee-login-modal').classList.add('active');
+                }
+            },
+            
+            closeEmployeeLoginModal: function() {
+                document.getElementById('employee-login-modal').classList.remove('active');
+                document.getElementById('employee-login-password').value = '';
+                document.getElementById('employee-login-error').style.display = 'none';
+                this.selectedEmployeeForLogin = null;
+            },
+            
+            confirmEmployeeLogin: function() {
+                if (!this.selectedEmployeeForLogin) return;
+                
+                const password = document.getElementById('employee-login-password').value;
+                const employees = this.getEmployees();
+                const employee = employees.find(emp => emp.id === this.selectedEmployeeForLogin);
+                
+                if (employee && employee.password === password) {
+                    this.currentEmployee = this.selectedEmployeeForLogin;
+                    this.closeEmployeeLoginModal();
+                    this.showPage('attendance');
+                } else {
+                    document.getElementById('employee-login-error').style.display = 'block';
+                    document.getElementById('employee-login-password').focus();
+                }
+            },
+            
+            loadAttendancePage: function() {
+                if (!this.currentEmployee) return;
+                
+                const employees = this.getEmployees();
+                const employee = employees.find(emp => emp.id === this.currentEmployee);
+                
+                if (employee) {
+                    document.getElementById('employee-fullname').textContent = 
+                        `${employee.firstName} ${employee.lastName}`;
+                }
+                
+                // Нишон додани санаи имрӯз
+                const currentDateDisplay = document.getElementById('current-date-display');
+                if (currentDateDisplay) {
+                    const today = new Date();
+                    const formattedDate = today.toLocaleDateString('tg', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                        weekday: 'long'
+                    });
+                    currentDateDisplay.textContent = formattedDate;
+                }
+                
+                document.querySelectorAll('.status-option').forEach(option => {
+                    option.classList.remove('selected');
+                });
+                
+                document.getElementById('save-attendance-btn').disabled = true;
+                this.loadAttendanceHistory();
+                this.checkExistingAttendance();
+            },
+            
+            selectStatus: function(element) {
+                document.querySelectorAll('.status-option').forEach(option => {
+                    option.classList.remove('selected');
+                });
+
+                element.classList.add('selected');
+                const action = element.getAttribute('data-status'); // start | end
+
+                const statusDisplay = document.getElementById('selected-status-display');
+                if (action === 'start') {
+                    statusDisplay.innerHTML = `<span class="status-badge present">Оғози кор</span>`;
+                } else {
+                    statusDisplay.innerHTML = `<span class="status-badge absent">Анҷоми кор</span>`;
+                }
+
+                document.getElementById('save-attendance-btn').disabled = false;
+            },
+
+            checkExistingAttendance: function() {
+                if (!this.currentEmployee) return;
+
+                // Ҳамеша санаи имрӯзро истифода мебарем
+                const date = this.currentDate;
+                const attendance = this.getAttendanceRecords();
+
+                const existing = attendance.find(record => 
+                    record.employeeId === this.currentEmployee && record.date === date
+                );
+
+                // Reset selection and button state
+                document.querySelectorAll('.status-option').forEach(option => option.classList.remove('selected'));
+
+                const statusDisplay = document.getElementById('selected-status-display');
+                const saveBtn = document.getElementById('save-attendance-btn');
+
+                if (existing) {
+                    const startT = existing.startTimestamp ? this.formatTime(existing.startTimestamp) : '—';
+                    const endT   = existing.endTimestamp ? this.formatTime(existing.endTimestamp) : '—';
+                    statusDisplay.innerHTML = `<span class="status-badge default">Қайдшуда: Оғоз = <b>${startT}</b> · Анҷом = <b>${endT}</b></span>`;
+                    
+                    // Агар ҳарду қайд шуда бошад, тугмаро хомӯш мекунем
+                    if (existing.startTimestamp && existing.endTimestamp) {
+                        saveBtn.disabled = true;
+                        saveBtn.innerHTML = '<i class="fas fa-check"></i> Ҳозирбуд пурра қайд шуд';
+                    } else {
+                        saveBtn.disabled = false;
+                        saveBtn.innerHTML = '<i class="fas fa-save"></i> Сабти вақт';
+                    }
+                } else {
+                    statusDisplay.innerHTML = `<span class="status-badge default">Ҳоло ягон вақт қайд нашудааст</span>`;
+                    saveBtn.disabled = true;
+                    saveBtn.innerHTML = '<i class="fas fa-save"></i> Сабти вақт';
+                }
+            },
+
+            saveAttendance: function() {
+                if (!this.currentEmployee) return;
+
+                // Ҳамеша санаи имрӯзро истифода мебарем
+                const date = this.currentDate;
+                const selectedOption = document.querySelector('.status-option.selected');
+
+                if (!selectedOption) {
+                    this.showToast('Лутфан амалро интихоб кунед: Оғози кор ё Анҷоми кор', 'error');
+                    return;
+                }
+
+                const action = selectedOption.getAttribute('data-status'); // start | end
+                const timestamp = new Date().toISOString();
+
+                let attendance = this.getAttendanceRecords();
+
+                let record = attendance.find(r => r.employeeId === this.currentEmployee && r.date === date);
+                if (!record) {
+                    record = { employeeId: this.currentEmployee, date, startTimestamp: null, endTimestamp: null };
+                    attendance.push(record);
+                }
+
+                if (action === 'start') {
+                    // Санҷиш, оё пештар оғози кор қайд шудааст?
+                    if (record.startTimestamp) {
+                        this.showToast('Оғози кор аллакай қайд шудааст', 'error');
+                        return;
+                    }
+                    record.startTimestamp = timestamp;
+                    this.showToast('Оғози кор қайд шуд', 'success');
+                } else {
+                    // Санҷиш, оё пештар анҷоми кор қайд шудааст?
+                    if (record.endTimestamp) {
+                        this.showToast('Анҷоми кор аллакай қайд шудааст', 'error');
+                        return;
+                    }
+                    // Санҷиш, оё оғози кор қайд шудааст?
+                    if (!record.startTimestamp) {
+                        this.showToast('Аввал бояд оғози кор қайд карда шавад', 'error');
+                        return;
+                    }
+                    record.endTimestamp = timestamp;
+                    this.showToast('Анҷоми кор қайд шуд', 'success');
+                }
+
+                this.saveAttendanceRecords(attendance);
+
+                // UI refresh
+                document.querySelectorAll('.status-option').forEach(option => option.classList.remove('selected'));
+                document.getElementById('save-attendance-btn').disabled = true;
+
+                this.checkExistingAttendance();
+                this.loadAttendanceHistory();
+                
+                // Агар анҷоми кор қайд шуд, ба саҳифаи кормандон бармегардем
+                if (action === 'end') {
+                    setTimeout(() => {
+                        this.showPage('employee');
+                    }, 1500);
+                }
+            },
+
+            loadAttendanceHistory: function() {
+                if (!this.currentEmployee) return;
+
+                const attendance = this.getAttendanceRecords();
+                const employeeAttendance = attendance
+                    .filter(record => record.employeeId === this.currentEmployee)
+                    .sort((a, b) => b.date.localeCompare(a.date));
+
+                const historyContainer = document.getElementById('attendance-history');
+
+                if (!historyContainer) return;
+
+                if (employeeAttendance.length === 0) {
+                    historyContainer.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-history"></i>
+                            <p>Ҳоло ягон вақт қайд нашудааст</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                historyContainer.innerHTML = employeeAttendance.map(record => {
+                    const startT = record.startTimestamp ? this.formatTime(record.startTimestamp) : '—';
+                    const endT   = record.endTimestamp ? this.formatTime(record.endTimestamp) : '—';
+                    const dateObj = new Date(record.date);
+                    const isToday = record.date === this.currentDate;
+                    const dateClass = isToday ? 'history-date today' : 'history-date';
+                    
+                    return `
+                        <div class="history-item">
+                            <div class="${dateClass}" style="${isToday ? 'color: #4a6cf7; font-weight: bold;' : ''}">
+                                ${this.formatDate(record.date)} ${isToday ? '(Имрӯз)' : ''}
+                            </div>
+                            <div class="history-status present">Оғоз: ${startT}</div>
+                            <div class="history-status absent">Анҷом: ${endT}</div>
+                        </div>
+                    `;
+                }).join('');
+            },
+            
+            toggleHistory: function() {
+                const historyContainer = document.querySelector('.history-container');
+                const isVisible = historyContainer.style.display !== 'none';
+                
+                if (isVisible) {
+                    historyContainer.style.display = 'none';
+                    document.getElementById('attendance-history-btn').innerHTML = '<i class="fas fa-history"></i> Таърихча';
+                } else {
+                    historyContainer.style.display = 'block';
+                    document.getElementById('attendance-history-btn').innerHTML = '<i class="fas fa-times"></i> Пинҳон кардан';
+                }
+            },
+            
+            setDefaultReportDates: function() {
+                const today = new Date();
+                const currentMonth = today.getMonth();
+                const currentYear = today.getFullYear();
+                
+                const reportMonth = document.getElementById('report-month');
+                const reportYear = document.getElementById('report-year');
+                const startDate = document.getElementById('start-date');
+                const endDate = document.getElementById('end-date');
+                
+                if (reportMonth) reportMonth.value = currentMonth;
+                if (reportYear) reportYear.value = currentYear;
+                
+                if (startDate && endDate) {
+                    const firstDayOfWeek = new Date(today.setDate(today.getDate() - today.getDay()));
+                    const lastDayOfWeek = new Date(today.setDate(today.getDate() - today.getDay() + 6));
+                    
+                    startDate.value = this.formatDateForReport(firstDayOfWeek);
+                    endDate.value = this.formatDateForReport(lastDayOfWeek);
+                }
+            },
+            
+            toggleReportFilters: function(reportType) {
+                const monthSelector = document.getElementById('month-selector');
+                const yearSelector = document.getElementById('year-selector');
+                const customRangeSelector = document.getElementById('custom-range-selector');
+                
+                if (reportType === 'week') {
+                    if (monthSelector) monthSelector.style.display = 'none';
+                    if (yearSelector) yearSelector.style.display = 'none';
+                    if (customRangeSelector) customRangeSelector.style.display = 'none';
+                } else if (reportType === 'month') {
+                    if (monthSelector) monthSelector.style.display = 'block';
+                    if (yearSelector) yearSelector.style.display = 'block';
+                    if (customRangeSelector) customRangeSelector.style.display = 'none';
+                } else if (reportType === 'custom') {
+                    if (monthSelector) monthSelector.style.display = 'none';
+                    if (yearSelector) yearSelector.style.display = 'none';
+                    if (customRangeSelector) customRangeSelector.style.display = 'block';
+                }
+            },
+            
+            validateDateRange: function() {
+                const startDate = document.getElementById('start-date');
+                const endDate = document.getElementById('end-date');
+                
+                if (startDate && endDate && startDate.value && endDate.value && startDate.value > endDate.value) {
+                    this.showToast('Санаи оғоз бояд пеш аз санаи поён бошад', 'error');
+                    endDate.value = startDate.value;
+                }
+            },
+            
+            generateReport: function() {
+                const reportType = document.getElementById('report-type').value;
+                const month = parseInt(document.getElementById('report-month').value);
+                const year = parseInt(document.getElementById('report-year').value);
+                
+                let startDate, endDate, reportTitle;
+                const today = new Date();
+                
+                if (reportType === 'week') {
+                    const firstDayOfWeek = new Date(today.setDate(today.getDate() - today.getDay()));
+                    const lastDayOfWeek = new Date(today.setDate(today.getDate() - today.getDay() + 6));
+                    
+                    startDate = this.formatDateForReport(firstDayOfWeek);
+                    endDate = this.formatDateForReport(lastDayOfWeek);
+                    reportTitle = `Ҳисоботи ҳафта: ${this.formatDateForExcel(startDate)} то ${this.formatDateForExcel(endDate)}`;
+                } else if (reportType === 'month') {
+                    startDate = `${year}-${String(month + 1).padStart(2, '0')}-01`;
+                    const lastDay = new Date(year, month + 1, 0).getDate();
+                    endDate = `${year}-${String(month + 1).padStart(2, '0')}-${lastDay}`;
+                    
+                    const monthNames = [
+                        'Январ', 'Феврал', 'Март', 'Апрел', 'Май', 'Июн',
+                        'Июл', 'Август', 'Сентябр', 'Октябр', 'Ноябр', 'Декабр'
+                    ];
+                    reportTitle = `Ҳисоботи моҳи ${monthNames[month]} ${year}`;
+                } else if (reportType === 'custom') {
+                    startDate = document.getElementById('start-date').value;
+                    endDate = document.getElementById('end-date').value;
+                    
+                    if (!startDate || !endDate) {
+                        this.showToast('Лутфан ҳарду санаро интихоб кунед', 'error');
+                        return;
+                    }
+                    
+                    reportTitle = `Ҳисоботи аз ${this.formatDateForExcel(startDate)} то ${this.formatDateForExcel(endDate)}`;
+                }
+                
+                const dates = this.getDatesBetween(startDate, endDate);
+                const employees = this.getEmployees();
+                const attendance = this.getAttendanceRecords();
+                
+                const sortedEmployees = this.sortEmployeesByName(employees);
+                
+                let tableHTML = `<h3>${reportTitle}</h3>`;
+                tableHTML += `<div style="overflow-x: auto; margin-top: 20px;">
+                    <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th style="min-width: 150px; position: sticky; left: 0; background-color: #f9f9ff; z-index: 1;" rowspan="2">Корманд</th>`;
+
+                dates.forEach(date => {
+                    tableHTML += `<th colspan="2" style="min-width: 140px;" title="${this.formatDate(date)}">${this.formatDateForExcel(date)}</th>`;
+                });
+
+                tableHTML += `<th rowspan="2">Оғозҳо</th><th rowspan="2">Анҷомҳо</th></tr>`;
+
+                tableHTML += `<tr>`;
+                dates.forEach(_ => {
+                    tableHTML += `<th style="min-width: 70px;">Оғоз</th><th style="min-width: 70px;">Анҷом</th>`;
+                });
+                tableHTML += `</tr></thead><tbody>`;
+                
+                sortedEmployees.forEach(employee => {
+                    const employeeAttendance = attendance.filter(record => 
+                        record.employeeId === employee.id && 
+                        dates.includes(record.date)
+                    );
+                    
+                    let startCount = 0;
+                    let endCount = 0;
+
+                    tableHTML += `<tr><td style="position: sticky; left: 0; background-color: white; z-index: 1;">${employee.firstName} ${employee.lastName}</td>`;
+
+                    dates.forEach(date => {
+                        const record = employeeAttendance.find(r => r.date === date);
+                        const startT = record && record.startTimestamp ? this.formatTime(record.startTimestamp) : '';
+                        const endT   = record && record.endTimestamp ? this.formatTime(record.endTimestamp) : '';
+
+                        if (startT) startCount++;
+                        if (endT) endCount++;
+
+                        tableHTML += startT 
+                          ? `<td class="present-cell" title="Оғоз: ${startT} (${this.formatDate(date)})">${startT}</td>`
+                          : `<td class="no-data" title="Оғоз нест (${this.formatDate(date)})">-</td>`;
+
+                        tableHTML += endT
+                          ? `<td class="absent-cell" title="Анҷом: ${endT} (${this.formatDate(date)})">${endT}</td>`
+                          : `<td class="no-data" title="Анҷом нест (${this.formatDate(date)})">-</td>`;
+                    });
+
+                    tableHTML += `<td style="font-weight: bold;">${startCount}</td><td style="font-weight: bold;">${endCount}</td></tr>`;
+                });
+                
+                tableHTML += `</tbody></table></div>`;
+                
+                document.getElementById('report-table-container').innerHTML = tableHTML;
+                this.showToast('Ҳисобот бо муваффақият сохта шуд', 'success');
+            },
+            
+            exportReportToExcel: function() {
+                const table = document.querySelector('.report-table');
+                if (!table) {
+                    this.showToast('Якҷоя сохтани ҳисоботро аввал иҷро кунед', 'error');
+                    return;
+                }
+                
+                try {
+                    const ws = XLSX.utils.table_to_sheet(table);
+                    
+                    const wscols = [{wch: 25}];
+                    
+                    const dateColumns = table.rows[0].cells.length - 4;
+                    for (let i = 0; i < dateColumns; i++) {
+                        wscols.push({wch: 12});
+                    }
+                    
+                    wscols.push({wch: 10}, {wch: 10}, {wch: 10});
+                    ws['!cols'] = wscols;
+                    
+                    const reportTitle = document.querySelector('#report-table-container h3');
+                    if (reportTitle) {
+                        XLSX.utils.sheet_add_aoa(ws, [[reportTitle.textContent]], { origin: -1 });
+                    }
+                    
+                    const wb = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(wb, ws, "Ҳисоботи_ҳозирбуд");
+                    
+                    const currentDate = new Date().toISOString().split('T')[0];
+                    const fileName = `Ҳисоботи_ҳозирбуд_${currentDate}.xlsx`;
+                    
+                    XLSX.writeFile(wb, fileName);
+                    this.showToast('Файл бо муваффақият бор карда шуд', 'success');
+                } catch (error) {
+                    this.showToast('Хатоги дар сохтани файли Excel', 'error');
+                    console.error(error);
+                }
+            },
+            
+            exportToJSON: function() {
+                const data = {
+                    employees: this.getEmployees(),
+                    attendance: this.getAttendanceRecords(),
+                    exportDate: new Date().toISOString()
+                };
+                
+                const dataStr = JSON.stringify(data, null, 2);
+                const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+                
+                const exportFileDefaultName = 'ҳозирбуд_маълумот.json';
+                
+                const linkElement = document.createElement('a');
+                linkElement.setAttribute('href', dataUri);
+                linkElement.setAttribute('download', exportFileDefaultName);
+                linkElement.click();
+                
+                this.showToast('Маълумот бо муваффақият бор карда шуд', 'success');
+            },
+            
+            importFromJSON: function(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const data = JSON.parse(e.target.result);
+                        
+                        if (!data.employees || !Array.isArray(data.employees)) {
+                            throw new Error('Формати файл нодуруст аст');
+                        }
+                        
+                        localStorage.removeItem('employees');
+                        localStorage.removeItem('attendance');
+                        
+                        if (data.employees) {
+                            this.saveEmployees(data.employees);
+                        }
+                        
+                        if (data.attendance) {
+                            this.saveAttendanceRecords(data.attendance);
+                        }
+                        
+                        event.target.value = '';
+                        
+                        this.showToast('Маълумот бо муваффақият бор карда шуд', 'success');
+                        this.loadEmployeesForAdmin();
+                    } catch (error) {
+                        this.showToast('Файли JSON нодуруст аст', 'error');
+                        console.error(error);
+                    }
+                };
+                reader.readAsText(file);
+            },
+            
+            exportToExcel: function() {
+                const employees = this.getEmployees();
+                const attendance = this.getAttendanceRecords();
+                
+                if (employees.length === 0) {
+                    this.showToast('Ягон корманд вуҷуд надорад', 'error');
+                    return;
+                }
+                
+                try {
+                    const employeeData = employees.map(emp => ({
+                        ID: emp.id,
+                        Ном: emp.firstName,
+                        Насаб: emp.lastName,
+                        Парол: emp.password
+                    }));
+                    
+                    const employeeWs = XLSX.utils.json_to_sheet(employeeData);
+                    
+                    const attendanceData = attendance.map(record => {
+                        const employee = employees.find(emp => emp.id === record.employeeId);
+                        const employeeName = employee ? `${employee.firstName} ${employee.lastName}` : 'Номаълум';
+                        
+                        return {
+                            'ID корманд': record.employeeId,
+                            Корманд: employeeName,
+                            Сана: this.formatDateForExcel(record.date),
+                            'Оғози кор': record.startTimestamp ? this.formatTime(record.startTimestamp) : '',
+                            'Анҷоми кор': record.endTimestamp ? this.formatTime(record.endTimestamp) : ''
+                        };
+                    });
+                    
+                    const attendanceWs = XLSX.utils.json_to_sheet(attendanceData);
+                    
+                    const wb = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(wb, employeeWs, "Кормандон");
+                    XLSX.utils.book_append_sheet(wb, attendanceWs, "Ҳозирбуд");
+                    
+                    const summaryData = this.createSummaryData(employees, attendance);
+                    const summaryWs = XLSX.utils.json_to_sheet(summaryData);
+                    XLSX.utils.book_append_sheet(wb, summaryWs, "Ҷамъбаст");
+                    
+                    XLSX.writeFile(wb, "ҳозирбуд_тамоми_маълумот.xlsx");
+                    this.showToast('Файл бо муваффақият бор карда шуд', 'success');
+                } catch (error) {
+                    this.showToast('Хатоги дар сохтани файли Excel', 'error');
+                    console.error(error);
+                }
+            },
+            
+            createSummaryData: function(employees, attendance) {
+                const today = new Date();
+                const currentMonth = today.getMonth();
+                const currentYear = today.getFullYear();
+                
+                const monthStart = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-01`;
+                const monthEnd = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${new Date(currentYear, currentMonth + 1, 0).getDate()}`;
+                
+                return employees.map(employee => {
+                    const employeeAttendance = attendance.filter(record => 
+                        record.employeeId === employee.id && 
+                        record.date >= monthStart && 
+                        record.date <= monthEnd
+                    );
+                    
+                    const startCount = employeeAttendance.filter(a => a.startTimestamp).length;
+                    const endCount = employeeAttendance.filter(a => a.endTimestamp).length;
+                    const totalDays = new Date(currentYear, currentMonth + 1, 0).getDate();
+                    const percentage = totalDays > 0 ? Math.round((startCount / totalDays) * 100) : 0;
+                    
+                    return {
+                        ID: employee.id,
+                        Корманд: `${employee.firstName} ${employee.lastName}`,
+                        'Оғози кор (моҳ)': startCount,
+                        'Анҷоми кор (моҳ)': endCount,
+                        'Фоиз (моҳ)': `${percentage}%`,
+                        'Оғози кор (ҳамагӣ)': attendance.filter(a => a.employeeId === employee.id && a.startTimestamp).length,
+                        'Анҷоми кор (ҳамагӣ)': attendance.filter(a => a.employeeId === employee.id && a.endTimestamp).length
+                    };
+                });
+            },
+            
+            // =========================
+// Supabase data layer (UI/графика тағйир намеёбад)
+// =========================
+supabase: null,
+supabaseUrl: 'PASTE_SUPABASE_URL_HERE',
+supabaseAnonKey: 'PASTE_SUPABASE_ANON_KEY_HERE',
+employeesCache: [],
+attendanceCache: [],
+dataLoaded: false,
+
+initSupabase: function() {
+    try {
+        if (!window.supabase || !window.supabase.createClient) {
+            console.warn('Supabase JS не загрузился');
+            return false;
+        }
+
+        // Шумо баъдтар ин ду сатҳро бо URL ва anon key-и худ иваз мекунед:
+        // this.supabaseUrl = 'https://xxxx.supabase.co';
+        // this.supabaseAnonKey = 'eyJ...';
+
+        if (!this.supabaseUrl || this.supabaseUrl.includes('PASTE_') ||
+            !this.supabaseAnonKey || this.supabaseAnonKey.includes('PASTE_')) {
+            console.warn('SUPABASE_URL / SUPABASE_ANON_KEY ҳоло ворид нашудааст. Барнома бе база кор намекунад.');
+            return false;
+        }
+
+        this.supabase = window.supabase.createClient(this.supabaseUrl, this.supabaseAnonKey);
+        return true;
+    } catch (e) {
+        console.error('initSupabase error', e);
+        return false;
+    }
+},
+
+// Як бор ҳангоми оғоз маълумотро аз Supabase мегирем
+loadData: async function() {
+    if (!this.supabase) {
+        // Агар калидҳо гузошта нашуда бошанд, кэш холӣ мемонад
+        this.dataLoaded = true;
+        return;
+    }
+
+    try {
+        // 1) Users (employees)
+        const { data: usersData, error: usersErr } = await this.supabase
+            .from('users')
+            .select('id, username, password, role, full_name')
+            .order('id', { ascending: true });
+
+        if (usersErr) throw usersErr;
+
+        this.employeesCache = (usersData || []).map(u => {
+            const full = (u.full_name || '').trim();
+            let firstName = full, lastName = '';
+            if (full.includes(' ')) {
+                const parts = full.split(' ').filter(Boolean);
+                firstName = parts.shift() || '';
+                lastName = parts.join(' ');
+            }
+            return {
+                id: u.id,
+                firstName,
+                lastName,
+                password: u.password || '',
+                username: u.username || '',
+                role: u.role || 'employee',
+                full_name: u.full_name || ''
+            };
+        });
+
+        // 2) Attendance
+        const { data: attData, error: attErr } = await this.supabase
+            .from('attendance')
+            .select('id, work_date, time_in, time_out, status, user_id')
+            .order('work_date', { ascending: false });
+
+        if (attErr) throw attErr;
+
+        const toIso = (workDate, timeStr) => {
+            if (!workDate || !timeStr) return null;
+            // workDate: YYYY-MM-DD, timeStr: HH:MM:SS
+            const dt = new Date(`${workDate}T${timeStr}`);
+            return isNaN(dt.getTime()) ? null : dt.toISOString();
+        };
+
+        this.attendanceCache = (attData || []).map(r => ({
+            employeeId: r.user_id,
+            date: r.work_date,
+            startTimestamp: toIso(r.work_date, r.time_in),
+            endTimestamp: toIso(r.work_date, r.time_out)
+        }));
+
+        this.dataLoaded = true;
+    } catch (e) {
+        console.error('loadData error', e);
+        this.showToast('Хато: маълумот аз Supabase гирифта нашуд. RLS/Policies-ро санҷед.', 'error');
+        this.dataLoaded = true;
+    }
+},
+
+// ===== Employees =====
+getEmployees: function() {
+    return Array.isArray(this.employeesCache) ? this.employeesCache : [];
+},
+
+saveEmployees: async function(employees) {
+    // Дар UI кэшро нав мекунем
+    this.employeesCache = Array.isArray(employees) ? employees : [];
+
+    // Ва ба Supabase ҳам нависем (upsert)
+    if (!this.supabase) return;
+
+    try {
+        const rows = this.employeesCache.map(e => {
+            const full = (e.full_name && e.full_name.trim())
+                ? e.full_name.trim()
+                : `${e.firstName || ''} ${e.lastName || ''}`.trim();
+
+            return {
+                id: e.id || undefined,
+                username: e.username || (String(e.id || '').trim() ? `user${e.id}` : ''),
+                password: e.password || '',
+                role: e.role || 'employee',
+                full_name: full
+            };
+        });
+
+        // Upsert by primary key id
+        const { error } = await this.supabase.from('users').upsert(rows, { onConflict: 'id' });
+        if (error) throw error;
+    } catch (e) {
+        console.error('saveEmployees error', e);
+        this.showToast('Хато: users ба Supabase сабт нашуд (Policies UPDATE/INSERT-ро санҷед).', 'error');
+    }
+},
+
+// ===== Attendance =====
+getAttendanceRecords: function() {
+    return Array.isArray(this.attendanceCache) ? this.attendanceCache : [];
+},
+
+saveAttendanceRecords: async function(attendance) {
+    this.attendanceCache = Array.isArray(attendance) ? attendance : [];
+
+    if (!this.supabase) return;
+
+    // Барнома як сабтро баъдтар иваз мекунад (time_out), барои ин UPDATE policy лозим мешавад.
+    // Мо кӯшиш мекунем: аввал INSERT, агар бошад — UPDATE мекунем.
+    try {
+        for (const rec of this.attendanceCache) {
+            if (!rec || !rec.employeeId || !rec.date) continue;
+
+            const work_date = rec.date;
+            const timeIn = rec.startTimestamp ? this.formatTimeForDb(rec.startTimestamp) : null;
+            const timeOut = rec.endTimestamp ? this.formatTimeForDb(rec.endTimestamp) : null;
+            const status = (timeIn || timeOut) ? 'present' : 'absent';
+
+            // 1) Кӯшиш мекунем сабти мавҷударо ёбем
+            const { data: existing, error: exErr } = await this.supabase
+                .from('attendance')
+                .select('id')
+                .eq('user_id', rec.employeeId)
+                .eq('work_date', work_date)
+                .maybeSingle();
+
+            if (exErr) throw exErr;
+
+            if (existing && existing.id) {
+                const { error: upErr } = await this.supabase
+                    .from('attendance')
+                    .update({ time_in: timeIn, time_out: timeOut, status })
+                    .eq('id', existing.id);
+                if (upErr) throw upErr;
+            } else {
+                const { error: insErr } = await this.supabase
+                    .from('attendance')
+                    .insert({ user_id: rec.employeeId, work_date, time_in: timeIn, time_out: timeOut, status });
+                if (insErr) throw insErr;
+            }
+        }
+    } catch (e) {
+        console.error('saveAttendanceRecords error', e);
+        this.showToast('Хато: attendance ба Supabase сабт нашуд (Policies INSERT/UPDATE-ро санҷед).', 'error');
+    }
+},
+
+deleteEmployeeAttendance: async function(employeeId) {
+    // Дар UI кэшро пок мекунем
+    this.attendanceCache = this.getAttendanceRecords().filter(r => r.employeeId !== employeeId);
+
+    // Аз Supabase: delete policy лозим мешавад. Агар нест — танҳо кэш пок мешавад.
+    if (!this.supabase) return;
+
+    try {
+        const { error } = await this.supabase
+            .from('attendance')
+            .delete()
+            .eq('user_id', employeeId);
+
+        if (error) {
+            // Агар delete policy нест, хато мешавад — UI кор мекунад, аммо база пок намешавад.
+            console.warn('deleteEmployeeAttendance:', error.message || error);
+        }
+    } catch (e) {
+        console.warn('deleteEmployeeAttendance error', e);
+    }
+},
+
+// Supabase барои time type HH:MM:SS мехоҳад
+formatTimeForDb: function(isoString) {
+    if (!isoString) return null;
+    const d = new Date(isoString);
+    if (isNaN(d.getTime())) return null;
+    const hh = String(d.getHours()).padStart(2, '0');
+    const mm = String(d.getMinutes()).padStart(2, '0');
+    const ss = String(d.getSeconds()).padStart(2, '0');
+    return `${hh}:${mm}:${ss}`;
+},
+
+
+            
+            formatDate: function(dateString) {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('tg', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+            },
+
+            formatTime: function(isoString) {
+                if (!isoString) return '';
+                const d = new Date(isoString);
+                if (isNaN(d.getTime())) return '';
+                return d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+            },
+
+            
+            formatDateForExcel: function(dateString) {
+                const date = new Date(dateString);
+                const day = String(date.getDate()).padStart(2, '0');
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const year = date.getFullYear();
+                return `${day}/${month}/${year}`;
+            },
+            
+            formatDateForReport: function(date) {
+                return date.toISOString().split('T')[0];
+            },
+            
+            getDatesBetween: function(startDate, endDate) {
+                const dates = [];
+                let currentDate = new Date(startDate);
+                const end = new Date(endDate);
+                
+                while (currentDate <= end) {
+                    dates.push(this.formatDateForReport(currentDate));
+                    currentDate.setDate(currentDate.getDate() + 1);
+                }
+                
+                return dates;
+            },
+            
+            showToast: function(message, type = 'info') {
+                const toast = document.getElementById('message-toast');
+                const toastMessage = document.getElementById('toast-message');
+                const toastIcon = document.getElementById('toast-icon');
+                
+                if (!toast || !toastMessage || !toastIcon) return;
+                
+                toastMessage.textContent = message;
+                toast.className = 'toast';
+                toast.classList.add(type);
+                
+                if (type === 'success') {
+                    toastIcon.className = 'fas fa-check-circle';
+                } else if (type === 'error') {
+                    toastIcon.className = 'fas fa-exclamation-circle';
+                } else if (type === 'warning') {
+                    toastIcon.className = 'fas fa-exclamation-triangle';
+                } else {
+                    toastIcon.className = 'fas fa-info-circle';
+                }
+                
+                toast.classList.add('active');
+                
+                setTimeout(() => {
+                    toast.classList.remove('active');
+                }, 3000);
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            await App.init();
+        });
+
+        window.App = App;
+    </script>
+</body>
+</html>
