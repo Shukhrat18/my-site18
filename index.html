@@ -2141,7 +2141,7 @@ clearEmployeeSelection: function() {
                 document.getElementById('add-edit-modal').classList.remove('active');
             },
             
-            saveEmployee: function() {
+            saveEmployee: async function() {
                 const firstName = document.getElementById('employee-firstname').value.trim();
                 const lastName = document.getElementById('employee-lastname').value.trim();
                 const password = document.getElementById('employee-password').value;
@@ -2164,11 +2164,10 @@ clearEmployeeSelection: function() {
                     return;
                 }
                 
-                let employees = this.getEmployees();
+                let employees = [...this.getEmployees()];
                 
                 if (isEditMode) {
-                    const id = parseInt(editId);
-                    const index = employees.findIndex(emp => emp.id === id);
+                    const index = employees.findIndex(emp => String(emp.id) === String(editId));
                     if (index !== -1) {
                         if (password.length >= 4) {
                             employees[index] = { 
@@ -2188,9 +2187,8 @@ clearEmployeeSelection: function() {
                         }
                     }
                 } else {
-                    const newId = employees.length > 0 ? Math.max(...employees.map(emp => emp.id)) + 1 : 1;
                     employees.push({
-                        id: newId,
+                        id: null,
                         firstName,
                         lastName,
                         password: password
@@ -2198,7 +2196,7 @@ clearEmployeeSelection: function() {
                     this.showToast('Корманд бо муваффақият илова шуд', 'success');
                 }
                 
-                this.saveEmployees(employees);
+                await this.saveEmployees(employees);
                 this.loadEmployeesForAdmin();
                 this.closeModal();
             },
@@ -2219,13 +2217,13 @@ clearEmployeeSelection: function() {
                 document.getElementById('delete-confirm-modal').classList.remove('active');
             },
             
-            confirmDeleteEmployee: function() {
-                const id = parseInt(document.getElementById('delete-confirm-modal').getAttribute('data-employee-id'));
+            confirmDeleteEmployee: async function() {
+                const id = document.getElementById('delete-confirm-modal').getAttribute('data-employee-id');
                 let employees = this.getEmployees();
                 
-                this.deleteEmployeeAttendance(id);
-                employees = employees.filter(emp => emp.id !== id);
-                this.saveEmployees(employees);
+                await this.deleteEmployeeAttendance(id);
+                employees = employees.filter(emp => String(emp.id) !== String(id));
+                await this.saveEmployees(employees);
                 
                 this.loadEmployeesForAdmin();
                 this.closeDeleteModal();
@@ -2922,18 +2920,28 @@ saveEmployees: async function(employees) {
                 ? e.full_name.trim()
                 : `${e.firstName || ''} ${e.lastName || ''}`.trim();
 
-            return {
-                id: e.id || undefined,
-                username: e.username || (String(e.id || '').trim() ? `user${e.id}` : ''),
+            const normalizedId = this.normalizeEmployeeId(e.id);
+            const row = {
+                username: e.username || (String(normalizedId || '').trim() ? `user${normalizedId}` : `user_${Date.now()}_${Math.floor(Math.random() * 1000)}`),
                 password: e.password || '',
                 role: e.role || 'employee',
                 full_name: full
             };
+
+            // Барои сабтҳои нав id-ро намефиристем, то база худаш эҷод кунад
+            if (normalizedId !== null) {
+                row.id = normalizedId;
+            }
+
+            return row;
         });
 
         // Upsert by primary key id
         const { error } = await this.supabase.from('users').upsert(rows, { onConflict: 'id' });
         if (error) throw error;
+
+        // Пас аз сабт, кэшро аз база аз нав мегирем, то id-ҳои нав дуруст шаванд
+        await this.loadData();
     } catch (e) {
         console.error('saveEmployees error', e);
         this.showToast('Хато: users ба Supabase сабт нашуд (Policies UPDATE/INSERT-ро санҷед).', 'error');
@@ -2992,7 +3000,7 @@ saveAttendanceRecords: async function(attendance) {
 
 deleteEmployeeAttendance: async function(employeeId) {
     // Дар UI кэшро пок мекунем
-    this.attendanceCache = this.getAttendanceRecords().filter(r => r.employeeId !== employeeId);
+    this.attendanceCache = this.getAttendanceRecords().filter(r => String(r.employeeId) !== String(employeeId));
 
     // Аз Supabase: delete policy лозим мешавад. Агар нест — танҳо кэш пок мешавад.
     if (!this.supabase) return;
@@ -3021,6 +3029,24 @@ formatTimeForDb: function(isoString) {
     const mm = String(d.getMinutes()).padStart(2, '0');
     const ss = String(d.getSeconds()).padStart(2, '0');
     return `${hh}:${mm}:${ss}`;
+},
+
+normalizeEmployeeId: function(id) {
+    if (id === null || id === undefined || id === '') return null;
+
+    // id метавонад number, numeric string ё uuid string бошад
+    if (typeof id === 'number' && Number.isFinite(id)) return id;
+
+    if (typeof id === 'string') {
+        const trimmed = id.trim();
+        if (!trimmed) return null;
+
+        // Барои рақамҳо арзиши ададӣ медиҳем, барои uuid/сатр ҳамонро мемонем
+        const parsed = Number(trimmed);
+        return Number.isFinite(parsed) ? parsed : trimmed;
+    }
+
+    return id;
 },
 
 
