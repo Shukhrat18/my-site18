@@ -2978,8 +2978,10 @@ saveEmployees: async function(employees) {
     } catch (e) {
         console.error('saveEmployees error', e);
         const errMsg = e && e.message ? ` (${e.message})` : '';
-        this.showToast(`Хато: users ба Supabase сабт нашуд${errMsg}`, 'error');
-        return false;
+        // Муҳим: маълумот аллакай дар localStorage сабт шуд, бинобар ин корбар
+        // набояд эҳсос кунад ки "сабт нашуд". Танҳо огоҳӣ медиҳем, ки sync ба Supabase нашуд.
+        this.showToast(`Огоҳӣ: аввал local сабт шуд, аммо Supabase sync нашуд${errMsg}`, 'warning');
+        return true;
     }
 },
 
