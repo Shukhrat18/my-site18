@@ -1290,7 +1290,10 @@
             init: async function() {
                 console.log('Инициализацияи барнома оғоз шуд');
                 // Supabase: аввал пайваст мешавем ва маълумотро мегирем
-                this.initSupabase();
+                const supabaseReady = this.initSupabase();
+                if (!supabaseReady && this.supabaseDisabledReason) {
+                    this.showToast(`Огоҳӣ: ${this.supabaseDisabledReason}. Сабт фақат local мешавад.`, 'warning');
+                }
                 await this.loadData();
                 this.checkFirstLogin();
                 this.setupEventListeners();
@@ -1373,7 +1376,14 @@
                     localStorage.setItem('employeePagePassword', 'emp1234');
                 }
 
-                // Агар рӯйхати кормандон холӣ бошад — намуна илова мекунем (барои санҷиш)
+                // Муҳим: агар Supabase фаъол бошад, маълумотро танҳо аз база мегирем.
+                // Иловаи "намунавӣ" бо id-ҳои локалӣ (1,2,3) метавонад insert/upsert-ро вайрон кунад
+                // (масалан, агар users.id дар Supabase навъи uuid бошад).
+                if (this.supabase) {
+                    return;
+                }
+
+                // Фақат дар офлайн-режим (бе Supabase) намуна мегузорем
                 const employees = this.getEmployees();
                 if (!employees || employees.length === 0) {
                     this.saveEmployees([
@@ -1779,6 +1789,9 @@
                         if (searchInput) {
                             searchInput.value = '';
                         }
+                    } else {
+                        this.showToast('Корманд барои таҳрир ёфт нашуд. Аз нав кушоед.', 'error');
+                        return;
                     }
                 } else {
                     console.error('Саҳифа ёфт нашуд:', pageName);
@@ -2100,6 +2113,7 @@ clearEmployeeSelection: function() {
                 if (togglePasswordBtn) togglePasswordBtn.innerHTML = '<i class="fas fa-eye"></i>';
                 document.getElementById('confirm-password-group').style.display = 'none';
                 document.getElementById('confirm-employee-password').value = '';
+                document.getElementById('edit-employee-id').textContent = '';
                 document.getElementById('edit-employee-id').style.display = 'none';
                 document.getElementById('employee-edit-note').style.display = 'none';
                 document.getElementById('add-edit-modal').classList.add('active');
@@ -2141,13 +2155,14 @@ clearEmployeeSelection: function() {
                 document.getElementById('add-edit-modal').classList.remove('active');
             },
             
-            saveEmployee: function() {
+            saveEmployee: async function() {
                 const firstName = document.getElementById('employee-firstname').value.trim();
                 const lastName = document.getElementById('employee-lastname').value.trim();
                 const password = document.getElementById('employee-password').value;
                 const confirmPassword = document.getElementById('confirm-employee-password').value;
-                const editId = document.getElementById('edit-employee-id').textContent;
-                const isEditMode = editId.length > 0;
+                const editIdEl = document.getElementById('edit-employee-id');
+                const editId = (editIdEl.textContent || '').trim();
+                const isEditMode = editIdEl.style.display !== 'none' && editId.length > 0;
                 
                 if (!firstName || !lastName) {
                     this.showToast('Ном ва насабро пур кунед', 'error');
@@ -2164,11 +2179,10 @@ clearEmployeeSelection: function() {
                     return;
                 }
                 
-                let employees = this.getEmployees();
+                let employees = [...this.getEmployees()];
                 
                 if (isEditMode) {
-                    const id = parseInt(editId);
-                    const index = employees.findIndex(emp => emp.id === id);
+                    const index = employees.findIndex(emp => String(emp.id) === String(editId));
                     if (index !== -1) {
                         if (password.length >= 4) {
                             employees[index] = { 
@@ -2177,30 +2191,39 @@ clearEmployeeSelection: function() {
                                 lastName,
                                 password: password
                             };
-                            this.showToast('Корманд бо пароли нав таҳрир шуд', 'success');
                         } else {
                             employees[index] = { 
                                 ...employees[index], 
                                 firstName, 
                                 lastName
                             };
-                            this.showToast('Корманд бо муваффақият таҳрир шуд', 'success');
                         }
+                    } else {
+                        this.showToast('Корманд барои таҳрир ёфт нашуд. Аз нав кушоед.', 'error');
+                        return;
                     }
                 } else {
-                    const newId = employees.length > 0 ? Math.max(...employees.map(emp => emp.id)) + 1 : 1;
                     employees.push({
-                        id: newId,
+                        id: null,
                         firstName,
                         lastName,
                         password: password
                     });
-                    this.showToast('Корманд бо муваффақият илова шуд', 'success');
                 }
                 
-                this.saveEmployees(employees);
+                const saved = await this.saveEmployees(employees);
+                if (!saved) {
+                    this.showToast('Сабт нашуд. Лутфан хатогии Supabase-ро санҷед.', 'error');
+                    return;
+                }
+
                 this.loadEmployeesForAdmin();
                 this.closeModal();
+                if (isEditMode) {
+                    this.showToast(password.length >= 4 ? 'Корманд бо пароли нав таҳрир шуд' : 'Корманд бо муваффақият таҳрир шуд', 'success');
+                } else {
+                    this.showToast('Корманд бо муваффақият илова шуд', 'success');
+                }
             },
             
             deleteEmployee: function(id) {
@@ -2219,14 +2242,18 @@ clearEmployeeSelection: function() {
                 document.getElementById('delete-confirm-modal').classList.remove('active');
             },
             
-            confirmDeleteEmployee: function() {
-                const id = parseInt(document.getElementById('delete-confirm-modal').getAttribute('data-employee-id'));
+            confirmDeleteEmployee: async function() {
+                const id = document.getElementById('delete-confirm-modal').getAttribute('data-employee-id');
                 let employees = this.getEmployees();
                 
-                this.deleteEmployeeAttendance(id);
-                employees = employees.filter(emp => emp.id !== id);
-                this.saveEmployees(employees);
-                
+                await this.deleteEmployeeAttendance(id);
+                employees = employees.filter(emp => String(emp.id) !== String(id));
+                const saved = await this.saveEmployees(employees);
+                if (!saved) {
+                    this.showToast('Ҳазф дар Supabase анҷом нашуд. Хатогиро санҷед.', 'error');
+                    return;
+                }
+
                 this.loadEmployeesForAdmin();
                 this.closeDeleteModal();
                 this.showToast('Корманд бо муваффақият ҳазф шуд', 'success');
@@ -2812,13 +2839,27 @@ supabaseAnonKey: 'PASTE_SUPABASE_ANON_KEY_HERE',
 employeesCache: [],
 attendanceCache: [],
 dataLoaded: false,
+localEmployeesKey: 'employeesCache',
+localAttendanceKey: 'attendanceCache',
+supabaseDisabledReason: '',
 
 initSupabase: function() {
     try {
+        this.supabaseDisabledReason = '';
+
         if (!window.supabase || !window.supabase.createClient) {
             console.warn('Supabase JS не загрузился');
+            this.supabaseDisabledReason = 'Supabase JS бор нашуд';
             return false;
         }
+
+        // Метавонед бе тағйири код аз localStorage низ гузоред:
+        // localStorage.setItem('supabaseUrl', 'https://xxxx.supabase.co')
+        // localStorage.setItem('supabaseAnonKey', 'eyJ...')
+        const localUrl = (localStorage.getItem('supabaseUrl') || '').trim();
+        const localKey = (localStorage.getItem('supabaseAnonKey') || '').trim();
+        if (localUrl) this.supabaseUrl = localUrl;
+        if (localKey) this.supabaseAnonKey = localKey;
 
         // Шумо баъдтар ин ду сатҳро бо URL ва anon key-и худ иваз мекунед:
         // this.supabaseUrl = 'https://xxxx.supabase.co';
@@ -2827,6 +2868,7 @@ initSupabase: function() {
         if (!this.supabaseUrl || this.supabaseUrl.includes('PASTE_') ||
             !this.supabaseAnonKey || this.supabaseAnonKey.includes('PASTE_')) {
             console.warn('SUPABASE_URL / SUPABASE_ANON_KEY ҳоло ворид нашудааст. Барнома бе база кор намекунад.');
+            this.supabaseDisabledReason = 'калидҳои Supabase ворид нашудаанд';
             return false;
         }
 
@@ -2834,6 +2876,7 @@ initSupabase: function() {
         return true;
     } catch (e) {
         console.error('initSupabase error', e);
+        this.supabaseDisabledReason = 'хатои инициализатсияи Supabase';
         return false;
     }
 },
@@ -2841,7 +2884,8 @@ initSupabase: function() {
 // Як бор ҳангоми оғоз маълумотро аз Supabase мегирем
 loadData: async function() {
     if (!this.supabase) {
-        // Агар калидҳо гузошта нашуда бошанд, кэш холӣ мемонад
+        // Агар Supabase фаъол набошад, аз localStorage мехонем
+        this.loadLocalCaches();
         this.dataLoaded = true;
         return;
     }
@@ -2896,10 +2940,12 @@ loadData: async function() {
             endTimestamp: toIso(r.work_date, r.time_out)
         }));
 
+        this.persistLocalCaches();
         this.dataLoaded = true;
     } catch (e) {
         console.error('loadData error', e);
-        this.showToast('Хато: маълумот аз Supabase гирифта нашуд. RLS/Policies-ро санҷед.', 'error');
+        this.showToast('Хато: маълумот аз Supabase гирифта нашуд. Аз localStorage истифода бурда шуд.', 'warning');
+        this.loadLocalCaches();
         this.dataLoaded = true;
     }
 },
@@ -2912,9 +2958,10 @@ getEmployees: function() {
 saveEmployees: async function(employees) {
     // Дар UI кэшро нав мекунем
     this.employeesCache = Array.isArray(employees) ? employees : [];
+    this.persistLocalEmployees();
 
     // Ва ба Supabase ҳам нависем (upsert)
-    if (!this.supabase) return;
+    if (!this.supabase) return true;
 
     try {
         const rows = this.employeesCache.map(e => {
@@ -2922,21 +2969,36 @@ saveEmployees: async function(employees) {
                 ? e.full_name.trim()
                 : `${e.firstName || ''} ${e.lastName || ''}`.trim();
 
-            return {
-                id: e.id || undefined,
-                username: e.username || (String(e.id || '').trim() ? `user${e.id}` : ''),
+            const normalizedId = this.normalizeEmployeeId(e.id);
+            const row = {
+                username: e.username || (String(normalizedId || '').trim() ? `user${normalizedId}` : `user_${Date.now()}_${Math.floor(Math.random() * 1000)}`),
                 password: e.password || '',
                 role: e.role || 'employee',
                 full_name: full
             };
+
+            // Барои сабтҳои нав id-ро намефиристем, то база худаш эҷод кунад
+            if (normalizedId !== null) {
+                row.id = normalizedId;
+            }
+
+            return row;
         });
 
         // Upsert by primary key id
         const { error } = await this.supabase.from('users').upsert(rows, { onConflict: 'id' });
         if (error) throw error;
+
+        // Пас аз сабт, кэшро аз база аз нав мегирем, то id-ҳои нав дуруст шаванд
+        await this.loadData();
+        return true;
     } catch (e) {
         console.error('saveEmployees error', e);
-        this.showToast('Хато: users ба Supabase сабт нашуд (Policies UPDATE/INSERT-ро санҷед).', 'error');
+        const errMsg = e && e.message ? ` (${e.message})` : '';
+        // Муҳим: маълумот аллакай дар localStorage сабт шуд, бинобар ин корбар
+        // набояд эҳсос кунад ки "сабт нашуд". Танҳо огоҳӣ медиҳем, ки sync ба Supabase нашуд.
+        this.showToast(`Огоҳӣ: аввал local сабт шуд, аммо Supabase sync нашуд${errMsg}`, 'warning');
+        return true;
     }
 },
 
@@ -2947,8 +3009,9 @@ getAttendanceRecords: function() {
 
 saveAttendanceRecords: async function(attendance) {
     this.attendanceCache = Array.isArray(attendance) ? attendance : [];
+    this.persistLocalAttendance();
 
-    if (!this.supabase) return;
+    if (!this.supabase) return true;
 
     // Барнома як сабтро баъдтар иваз мекунад (time_out), барои ин UPDATE policy лозим мешавад.
     // Мо кӯшиш мекунем: аввал INSERT, агар бошад — UPDATE мекунем.
@@ -2992,10 +3055,11 @@ saveAttendanceRecords: async function(attendance) {
 
 deleteEmployeeAttendance: async function(employeeId) {
     // Дар UI кэшро пок мекунем
-    this.attendanceCache = this.getAttendanceRecords().filter(r => r.employeeId !== employeeId);
+    this.attendanceCache = this.getAttendanceRecords().filter(r => String(r.employeeId) !== String(employeeId));
+    this.persistLocalAttendance();
 
     // Аз Supabase: delete policy лозим мешавад. Агар нест — танҳо кэш пок мешавад.
-    if (!this.supabase) return;
+    if (!this.supabase) return true;
 
     try {
         const { error } = await this.supabase
@@ -3012,6 +3076,41 @@ deleteEmployeeAttendance: async function(employeeId) {
     }
 },
 
+persistLocalEmployees: function() {
+    try {
+        localStorage.setItem(this.localEmployeesKey, JSON.stringify(this.getEmployees()));
+    } catch (e) {
+        console.warn('persistLocalEmployees error', e);
+    }
+},
+
+persistLocalAttendance: function() {
+    try {
+        localStorage.setItem(this.localAttendanceKey, JSON.stringify(this.getAttendanceRecords()));
+    } catch (e) {
+        console.warn('persistLocalAttendance error', e);
+    }
+},
+
+persistLocalCaches: function() {
+    this.persistLocalEmployees();
+    this.persistLocalAttendance();
+},
+
+loadLocalCaches: function() {
+    try {
+        const employeesRaw = localStorage.getItem(this.localEmployeesKey);
+        const attendanceRaw = localStorage.getItem(this.localAttendanceKey);
+
+        this.employeesCache = employeesRaw ? JSON.parse(employeesRaw) : [];
+        this.attendanceCache = attendanceRaw ? JSON.parse(attendanceRaw) : [];
+    } catch (e) {
+        console.warn('loadLocalCaches error', e);
+        this.employeesCache = [];
+        this.attendanceCache = [];
+    }
+},
+
 // Supabase барои time type HH:MM:SS мехоҳад
 formatTimeForDb: function(isoString) {
     if (!isoString) return null;
@@ -3021,6 +3120,24 @@ formatTimeForDb: function(isoString) {
     const mm = String(d.getMinutes()).padStart(2, '0');
     const ss = String(d.getSeconds()).padStart(2, '0');
     return `${hh}:${mm}:${ss}`;
+},
+
+normalizeEmployeeId: function(id) {
+    if (id === null || id === undefined || id === '') return null;
+
+    // id метавонад number, numeric string ё uuid string бошад
+    if (typeof id === 'number' && Number.isFinite(id)) return id;
+
+    if (typeof id === 'string') {
+        const trimmed = id.trim();
+        if (!trimmed) return null;
+
+        // Барои рақамҳо арзиши ададӣ медиҳем, барои uuid/сатр ҳамонро мемонем
+        const parsed = Number(trimmed);
+        return Number.isFinite(parsed) ? parsed : trimmed;
+    }
+
+    return id;
 },
 
 
