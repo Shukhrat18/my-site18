@@ -2838,6 +2838,7 @@ attendanceCache: [],
 dataLoaded: false,
 localEmployeesKey: 'employeesCache',
 localAttendanceKey: 'attendanceCache',
+supabaseConfigWarned: false,
 
 initSupabase: function() {
     try {
@@ -2846,13 +2847,26 @@ initSupabase: function() {
             return false;
         }
 
-        // Шумо баъдтар ин ду сатҳро бо URL ва anon key-и худ иваз мекунед:
-        // this.supabaseUrl = 'https://xxxx.supabase.co';
-        // this.supabaseAnonKey = 'eyJ...';
+        // Шумо метавонед URL/KEY-ро дар код гузоред ё ба localStorage сабт кунед:
+        // localStorage.setItem('supabaseUrl', 'https://xxxx.supabase.co')
+        // localStorage.setItem('supabaseAnonKey', 'eyJ...')
+        const savedUrl = localStorage.getItem('supabaseUrl');
+        const savedKey = localStorage.getItem('supabaseAnonKey');
+
+        if ((this.supabaseUrl || '').includes('PASTE_') && savedUrl) {
+            this.supabaseUrl = savedUrl;
+        }
+        if ((this.supabaseAnonKey || '').includes('PASTE_') && savedKey) {
+            this.supabaseAnonKey = savedKey;
+        }
 
         if (!this.supabaseUrl || this.supabaseUrl.includes('PASTE_') ||
             !this.supabaseAnonKey || this.supabaseAnonKey.includes('PASTE_')) {
-            console.warn('SUPABASE_URL / SUPABASE_ANON_KEY ҳоло ворид нашудааст. Барнома бе база кор намекунад.');
+            console.warn('SUPABASE_URL / SUPABASE_ANON_KEY ҳоло ворид нашудааст. Барнома бо localStorage кор мекунад.');
+            if (!this.supabaseConfigWarned) {
+                this.showToast('Supabase танзим нашудааст: ҳоло танҳо localStorage истифода мешавад.', 'warning');
+                this.supabaseConfigWarned = true;
+            }
             return false;
         }
 
@@ -2944,7 +2958,13 @@ saveEmployees: async function(employees) {
     this.persistLocalEmployees();
 
     // Ва ба Supabase ҳам нависем (upsert)
-    if (!this.supabase) return true;
+    if (!this.supabase) {
+        if (!this.supabaseConfigWarned) {
+            this.showToast('Сабт local шуд. Барои база Supabase URL/KEY-ро гузоред.', 'warning');
+            this.supabaseConfigWarned = true;
+        }
+        return true;
+    }
 
     try {
         const rows = this.employeesCache.map(e => {
